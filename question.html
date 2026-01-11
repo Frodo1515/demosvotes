@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vote</title>
+  <style>
+    body{font-family:system-ui,Arial,sans-serif;background:#111;color:#fff;margin:0;padding:24px}
+    .card{max-width:520px;margin:0 auto;background:#1b1b1b;border-radius:16px;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+    h1{margin:0 0 10px;font-size:22px;text-align:center}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+    button{font-size:20px;padding:16px;border-radius:14px;border:0;cursor:pointer}
+    .ok{color:#4caf50;text-align:center;margin-top:14px}
+    .no{color:#ff6b6b;text-align:center;margin-top:14px}
+    .muted{opacity:.75;font-size:13px;text-align:center;margin-top:10px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="title">Vote</h1>
+    <div class="grid" id="buttons"></div>
+    <div id="msg" class="muted">Choisissez une réponse.</div>
+  </div>
+
+<script>
+  // 🔴 Mets ici TON URL Apps Script /exec (la même que partout)
+  const SCRIPT_URL = https://script.google.com/macros/s/AKfycbx4CGE-4a-dwso3ZeEcyj0YhQh1SmIZT-_MrRJvvVQxiGRYkcGGBrHJmPRQ2B7EVZMu/exec;
+
+  const params = new URLSearchParams(location.search);
+  const vote = params.get("vote"); // ex: Vote1
+
+  const buttonsEl = document.getElementById("buttons");
+  const msgEl = document.getElementById("msg");
+  const titleEl = document.getElementById("title");
+
+  if (!vote) {
+    titleEl.textContent = "Lien invalide";
+    msgEl.className = "no";
+    msgEl.textContent = "Paramètre vote manquant.";
+  } else {
+    titleEl.textContent = vote.replace("Vote","VOTE ");
+
+    const needE = (vote === "Vote6" || vote === "Vote7");
+    const choices = needE ? ["A","B","C","D","E"] : ["A","B","C","D"];
+
+    const storageKey = "voted_" + vote;
+    if (localStorage.getItem(storageKey)) {
+      msgEl.className = "no";
+      msgEl.textContent = "Vous avez déjà voté pour cette question.";
+    } else {
+      choices.forEach(ch => {
+        const b = document.createElement("button");
+        b.textContent = ch;
+        b.onclick = async () => {
+          try {
+            b.disabled = true;
+            msgEl.className = "muted";
+            msgEl.textContent = "Enregistrement du vote…";
+
+            const r = await fetch(`${SCRIPT_URL}?vote=${encodeURIComponent(vote)}&choice=${encodeURIComponent(ch)}`);
+            const data = await r.json();
+
+            if (data && data.ok) {
+              localStorage.setItem(storageKey, "1");
+              msgEl.className = "ok";
+              msgEl.textContent = "Merci, votre vote a bien été pris en compte.";
+              buttonsEl.querySelectorAll("button").forEach(x => x.disabled = true);
+            } else {
+              msgEl.className = "no";
+              msgEl.textContent = "Erreur : vote non enregistré.";
+              b.disabled = false;
+            }
+          } catch (e) {
+            msgEl.className = "no";
+            msgEl.textContent = "Erreur réseau. Réessayez.";
+            b.disabled = false;
+          }
+        };
+        buttonsEl.appendChild(b);
+      });
+      msgEl.className = "muted";
+      msgEl.textContent = "Choisissez une réponse. (1 vote par téléphone)";
+    }
+  }
+</script>
+</body>
+</html>
