@@ -1,147 +1,335 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Vote en cours</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="pragma" content="no-cache">
-  <meta http-equiv="expires" content="0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vote – DÉMOS</title>
   <style>
     :root{
-      --bg:#0f0f10; --card:#17171a; --text:#fff; --muted:rgba(255,255,255,.75);
-      --accent:#4caf50; --stroke:rgba(255,255,255,.12);
+      --bg:#0f0f10;
+      --panel:#17171a;
+      --stroke:rgba(255,255,255,.12);
+      --text:#ffffff;
+      --muted:rgba(255,255,255,.75);
+      --accent:#4caf50;
+      --danger:#ff6b6b;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);
-      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-    .wrap{width:min(1100px,100%);display:grid;gap:18px;}
-    .top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;}
-    .title{display:flex;flex-direction:column;gap:6px}
-    h1{margin:0;font-size:clamp(28px,3vw,46px);letter-spacing:.5px}
-    .subtitle{margin:0;color:var(--muted);font-size:clamp(14px,1.6vw,18px)}
-    .card{background:var(--card);border:1px solid var(--stroke);border-radius:22px;padding:18px}
-    .timer{min-width:280px}
-    .timer .label{color:var(--muted);font-size:14px}
-    .timer .seconds{font-variant-numeric:tabular-nums;font-size:42px;font-weight:800;letter-spacing:1px}
-    .bar{width:100%;height:10px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;margin-top:8px}
-    .bar>div{height:100%;width:100%;background:var(--accent);transform-origin:left;transform:scaleX(1);transition:transform .25s linear}
-    .main{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
-    @media(max-width:860px){.main{grid-template-columns:1fr}.timer{min-width:unset;width:100%}}
-    .qrbox{display:flex;align-items:center;justify-content:center;min-height:520px}
-    .qrimg{width:min(520px,100%);aspect-ratio:1/1;border-radius:18px;background:#fff;padding:16px;display:flex;align-items:center;justify-content:center}
-    .qrimg img{width:100%;height:100%;object-fit:contain}
-    .right{display:flex;flex-direction:column;gap:14px}
-    .pillrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
-    .pill{border:1px solid var(--stroke);background:rgba(255,255,255,.06);padding:8px 10px;border-radius:999px;font-size:13px;color:var(--muted)}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto}
-    button{border:0;border-radius:14px;padding:12px 14px;font-size:15px;cursor:pointer;font-weight:650}
-    .btn-primary{background:var(--accent);color:#081108}
-    .btn-ghost{background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--stroke)}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      height:100vh;
+      overflow:hidden;
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 14px;
+      background:var(--panel);
+      border-bottom:1px solid var(--stroke);
+      flex-wrap:wrap;
+    }
+    .leftHead{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+    .badge{
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.06);
+      padding:4px 10px;
+      border-radius:999px;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .btn{
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:700;
+    }
+    .btn:hover{background:rgba(255,255,255,.10)}
+    .btn.accent{border-color:rgba(76,175,80,.55)}
+    .btn.danger{border-color:rgba(255,107,107,.55)}
+
+    main{
+      height:calc(100vh - 58px);
+      padding:16px;
+      display:grid;
+      grid-template-columns: 520px 1fr;
+      gap:16px;
+    }
+    @media (max-width: 980px){
+      main{
+        grid-template-columns: 1fr;
+        height:auto;
+        overflow:auto;
+      }
+      body{overflow:auto}
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:16px;
+      height:100%;
+      min-height:0;
+    }
+
+    /* Zone QR */
+    .qrWrap{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      height:100%;
+      min-height:0;
+      align-items:center;
+      justify-content:flex-start;
+    }
+    .qrTitle{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .qrTitle h1{
+      font-size:20px;
+      margin:0;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .qrSubtitle{color:var(--muted); font-size:14px}
+    .qrBox{
+      width:100%;
+      flex:1;
+      min-height:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:16px;
+      background:rgba(255,255,255,.04);
+      border:1px dashed rgba(255,255,255,.18);
+      padding:14px;
+    }
+    img#qrImg{
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      border-radius:14px;
+      background:#fff;
+      padding:10px;
+    }
+    .timerRow{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .timeBig{
+      font-size:42px;
+      font-weight:950;
+      letter-spacing:.5px;
+    }
+    .progress{
+      width:100%;
+      height:12px;
+      border-radius:999px;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.06);
+      overflow:hidden;
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background:var(--accent);
+      border-radius:999px;
+      transition:width .2s linear;
+    }
+
+    /* Zone Question */
+    .qWrap{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      height:100%;
+      min-height:0;
+    }
+    .qWrap h2{
+      margin:0;
+      font-size:26px;
+      font-weight:950;
+      line-height:1.15;
+    }
+    .choices{
+      margin:0;
+      padding-left:22px;
+      font-size:20px;
+      line-height:1.5;
+      color:var(--text);
+    }
+    .choices li{
+      margin:10px 0;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.05);
+    }
+    .footNote{
+      margin-top:auto;
+      color:var(--muted);
+      font-size:14px;
+      border-top:1px solid var(--stroke);
+      padding-top:12px;
+    }
+
+    /* Écran de transition fin de vote */
+    .overlay{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,.75);
+      z-index:50;
+      padding:20px;
+    }
+    .overlay .box{
+      max-width:680px;
+      width:100%;
+      background:var(--panel);
+      border:1px solid var(--stroke);
+      border-radius:20px;
+      padding:22px;
+      text-align:center;
+    }
+    .overlay .box h3{
+      margin:0 0 8px 0;
+      font-size:28px;
+      font-weight:950;
+    }
+    .overlay .box p{
+      margin:0;
+      color:var(--muted);
+      font-size:16px;
+    }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="top">
-      <div class="title">
-        <h1 id="h1">VOTE</h1>
-        <p class="subtitle" id="subtitle">Scannez le QR code et votez maintenant.</p>
-      </div>
-
-      <div class="timer card">
-        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
-          <div class="label">Temps restant</div>
-          <div class="seconds"><span id="sec">45</span>s</div>
-        </div>
-        <div class="bar"><div id="barfill"></div></div>
-      </div>
-    </div>
-
-    <div class="main">
-      <div class="card qrbox">
-        <div class="qrimg">
-          <img id="qr" alt="QR Code">
-        </div>
-      </div>
-
-      <div class="card right">
-        <div class="pillrow">
-          <div class="pill" id="pillVote">Vote: —</div>
-          <div class="pill">Durée: 45 sec</div>
-          <div class="pill">Résultats: en direct</div>
-        </div>
-
-        <div class="actions">
-          <button class="btn-primary" id="btnResults">Afficher les résultats</button>
-          <button class="btn-ghost" id="btnRestart">Relancer 45s</button>
-        </div>
-
-        <div style="color:rgba(255,255,255,.75);font-size:14px;line-height:1.5">
-          Astuce : tu peux aussi afficher ces QR codes sur papier.<br>
-          URL : <code>vote.html?vote=Vote1</code> … <code>Vote8</code>
-        </div>
-      </div>
-    </div>
+<header>
+  <div class="leftHead">
+    <div class="badge" id="badgeVote">Vote</div>
+    <div class="badge" id="badgeUrl">QR : …</div>
   </div>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <button class="btn" id="btnRestart" title="Relancer le timer">↻ Relancer</button>
+    <button class="btn accent" id="btnFullscreen">⛶ Plein écran</button>
+    <button class="btn danger" id="btnShowResults">📊 Résultats</button>
+  </div>
+</header>
+
+<main>
+  <!-- Colonne QR -->
+  <section class="card">
+    <div class="qrWrap">
+      <div class="qrTitle">
+        <div>
+          <h1>Scannez pour voter</h1>
+          <div class="qrSubtitle">Un vote par personne • Durée limitée</div>
+        </div>
+        <div class="badge" id="badgeTimer">Temps restant</div>
+      </div>
+
+      <div class="qrBox">
+        <img id="qrImg" alt="QR Code Vote" />
+      </div>
+
+      <div class="timerRow">
+        <div class="timeBig" id="timeLeft">30</div>
+        <div class="badge" id="status">Vote ouvert</div>
+      </div>
+
+      <div class="progress" aria-label="Progression du vote">
+        <div class="bar" id="bar"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Colonne Question -->
+  <section class="card">
+    <div class="qWrap">
+      <div class="badge">Question & choix</div>
+      <h2 id="qTitle">Chargement…</h2>
+      <ol class="choices" id="qChoices"></ol>
+
+      <div class="footNote">
+        Astuce animateur : pour changer la durée, ajoute <b>&sec=45</b> dans l’URL.
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Transition fin de vote -->
+<div class="overlay" id="overlay">
+  <div class="box">
+    <h3>Vote terminé</h3>
+    <p>Affichage des résultats…</p>
+  </div>
+</div>
 
 <script>
-(function(){
-  const DURATION = 45;
+/* =========================
+   1) QUESTIONS / CHOIX ICI
+   ========================= */
+const POLLS = {
+  Vote1: { question: "QUESTION 1 (à remplacer)", choices: ["Choix A", "Choix B", "Choix C", "Choix D"] },
+  Vote2: { question: "QUESTION 2 (à remplacer)", choices: ["Choix A", "Choix B", "Choix C", "Choix D"] },
+  Vote3: { question: "QUESTION 3 (à remplacer)", choices: ["Choix A", "Choix B", "Choix C", "Choix D"] },
+  Vote4: { question: "QUESTION 4 (à remplacer)", choices: ["Choix A", "Choix B", "Choix C", "Choix D"] },
+  Vote5: { question: "QUESTION 5 (à remplacer)", choices: ["Choix A", "Choix B", "Choix C", "Choix D"] },
+  Vote6: { question: "QUESTION 6 (à remplacer)", choices: ["Choix A", "Choix B", "Choix C", "Choix D"] },
+  Vote7: { question: "QUESTION 7 (à remplacer)", choices: ["Choix A", "Choix B", "Choix C", "Choix D"] },
+  Vote8: { question: "QUESTION 8 (à remplacer)", choices: ["Choix A", "Choix B", "Choix C", "Choix D"] }
+};
 
-  const u = new URL(window.location.href);
-  const vote = u.searchParams.get("vote") || "Vote1"; // Vote1..Vote8
-  const n = (vote.match(/\d+/) || ["1"])[0];          // "1".."8"
+/* =========================
+   2) LOGIQUE D'AFFICHAGE
+   ========================= */
+const qs = new URLSearchParams(location.search);
+const voteKey = qs.get("vote") || "Vote1";
+const secParam = parseInt(qs.get("sec") || "30", 10);
+const DURATION = Number.isFinite(secParam) && secParam > 5 ? secParam : 30;
 
-  // Affichage du bon PNG (dossier /qrs/)
-  const qrImg = document.getElementById("qr");
-  qrImg.src = `qrs/VOTE_${n}.png?nocache=${Date.now()}`;
+const poll = POLLS[voteKey] || null;
 
-  // Résultats (poll=vote1..vote8)
-  const poll = `vote${n}`;
-  const resultsLink = `resultat.html?poll=${encodeURIComponent(poll)}&nocache=${Date.now()}`;
+const badgeVote = document.getElementById("badgeVote");
+const badgeUrl  = document.getElementById("badgeUrl");
+const qTitle    = document.getElementById("qTitle");
+const qChoices  = document.getElementById("qChoices");
+const qrImg     = document.getElementById("qrImg");
+const timeLeft  = document.getElementById("timeLeft");
+const bar       = document.getElementById("bar");
+const status    = document.getElementById("status");
+const overlay   = document.getElementById("overlay");
 
-  // UI
-  document.getElementById("h1").textContent = vote.replace("Vote","VOTE ");
-  document.getElementById("pillVote").textContent = "Vote: " + vote.replace("Vote","VOTE ");
+badgeVote.textContent = voteKey.toUpperCase();
 
-  document.getElementById("btnResults").onclick = () => location.href = resultsLink;
+function voteNumberFromKey(k){
+  const m = String(k).match(/(\d+)/);
+  return m ? parseInt(m[1], 10) : 1;
+}
+const voteNum = voteNumberFromKey(voteKey);
 
-  // Countdown
-  let remaining = DURATION;
-  let timer = null;
-  const secEl = document.getElementById("sec");
-  const barfill = document.getElementById("barfill");
-  const subtitle = document.getElementById("subtitle");
+// QR image (dans /qrs/VOTE_X.png)
+qrImg.src = `qrs/VOTE_${voteNum}.png`;
 
-  function render(){
-    secEl.textContent = String(remaining);
-    barfill.style.transform = `scaleX(${Math.max(0, remaining / DURATION)})`;
-  }
-
-  function endVote(){
-    clearInterval(timer); timer=null;
-    remaining = 0; render();
-    subtitle.textContent = "Vote terminé. Affichage des résultats…";
-    setTimeout(() => location.href = resultsLink, 800);
-  }
-
-  function start(){
-    clearInterval(timer);
-    remaining = DURATION;
-    subtitle.textContent = "Scannez le QR code et votez maintenant.";
-    render();
-    timer = setInterval(() => {
-      remaining--;
-      render();
-      if (remaining <= 0) endVote();
-    }, 1000);
-  }
-
-  document.getElementById("btnRestart").onclick = start;
-
-  start();
-})();
-</script>
-</body>
-</html>
+// Lien QR (la page question sur téléphone)
+c
