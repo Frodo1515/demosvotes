@@ -1,39 +1,352 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Vote en cours…</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>Vote en cours</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="pragma" content="no-cache">
   <meta http-equiv="expires" content="0">
   <style>
-    body{
-      font-family:system-ui,Arial,sans-serif;background:#111;color:#fff;
-      display:flex;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center
+    :root{
+      --bg:#0f0f10;
+      --card:#17171a;
+      --text:#ffffff;
+      --muted:rgba(255,255,255,.75);
+      --accent:#4caf50;
+      --danger:#ff6b6b;
+      --stroke:rgba(255,255,255,.12);
     }
-    .box{max-width:520px;padding:20px}
-    .muted{opacity:.8;margin-top:10px}
-    a{color:#9ad;word-break:break-all}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+    .wrap{
+      width:min(1100px, 100%);
+      display:grid;
+      gap:18px;
+    }
+    .top{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    h1{
+      margin:0;
+      font-size: clamp(28px, 3vw, 46px);
+      letter-spacing:.5px;
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size: clamp(14px, 1.6vw, 18px);
+    }
+    .timer{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px 16px;
+      border-radius:16px;
+      background:var(--card);
+      border:1px solid var(--stroke);
+      min-width:280px;
+      justify-content:space-between;
+    }
+    .timer .label{
+      color:var(--muted);
+      font-size:14px;
+    }
+    .timer .seconds{
+      font-variant-numeric: tabular-nums;
+      font-size:42px;
+      font-weight:800;
+      letter-spacing:1px;
+    }
+    .bar{
+      width:100%;
+      height:10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+    .bar > div{
+      height:100%;
+      width:100%;
+      background:var(--accent);
+      transform-origin:left center;
+      transform:scaleX(1);
+      transition:transform .25s linear;
+    }
+    .main{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:18px;
+    }
+    @media (max-width: 860px){
+      .main{grid-template-columns:1fr}
+      .timer{min-width:unset; width:100%}
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:22px;
+      padding:18px;
+    }
+    .qrbox{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      min-height:520px;
+    }
+    .qrimg{
+      width:min(520px, 100%);
+      aspect-ratio:1/1;
+      border-radius:18px;
+      background:#fff;
+      padding:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .qrimg img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      image-rendering: pixelated;
+    }
+    .right{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+    .big{
+      font-size: clamp(18px, 2.2vw, 28px);
+      line-height:1.25;
+      margin:0;
+    }
+    .muted{
+      color:var(--muted);
+      margin:0;
+      font-size:15px;
+      line-height:1.5;
+    }
+    .pillrow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:6px;
+    }
+    .pill{
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.06);
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:auto;
+    }
+    button{
+      border:0;
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:15px;
+      cursor:pointer;
+      font-weight:650;
+    }
+    .btn-primary{ background:var(--accent); color:#081108; }
+    .btn-ghost{ background:rgba(255,255,255,.08); color:var(--text); border:1px solid var(--stroke); }
+    .btn-danger{ background:rgba(255,107,107,.18); color:#ffd0d0; border:1px solid rgba(255,107,107,.35); }
+    .smalllink{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+      word-break:break-all;
+    }
+    a{color:#9ad}
+    .ended{
+      display:none;
+      text-align:center;
+      padding:16px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.06);
+    }
+    .ended h2{margin:0 0 6px; font-size:26px}
+    .ended p{margin:0; color:var(--muted)}
   </style>
 </head>
+
 <body>
-  <div class="box" id="box">
-    <div style="font-size:1.2rem">Redirection vers la page de vote…</div>
-    <div class="muted">Si rien ne se passe, cliquez : <a id="link" href="#">ouvrir le vote</a></div>
+  <div class="wrap">
+
+    <div class="top">
+      <div class="title">
+        <h1 id="h1">VOTE</h1>
+        <p class="subtitle" id="subtitle">Scannez le QR code et votez maintenant.</p>
+      </div>
+
+      <div class="timer card">
+        <div style="display:flex; flex-direction:column; gap:6px; width:100%;">
+          <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
+            <div class="label">Temps restant</div>
+            <div class="seconds"><span id="sec">45</span>s</div>
+          </div>
+          <div class="bar"><div id="barfill"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="card qrbox">
+        <div class="qrimg" aria-label="QR Code">
+          <img id="qr" alt="QR Code" />
+        </div>
+      </div>
+
+      <div class="card right">
+        <p class="big" id="questionHint">📱 Vote sur téléphone en 1 clic</p>
+        <p class="muted">
+          Ouvrez l’appareil photo, scannez, choisissez A/B/C/D (ou E selon la question).
+          Un seul vote par téléphone est autorisé.
+        </p>
+
+        <div class="pillrow">
+          <div class="pill" id="pillVote">Vote: —</div>
+          <div class="pill">Durée: 45 sec</div>
+          <div class="pill">Résultats: en direct</div>
+        </div>
+
+        <div class="ended" id="endedBox">
+          <h2>Vote terminé</h2>
+          <p>Affichage des résultats…</p>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" id="btnResults">Afficher les résultats</button>
+          <button class="btn-ghost" id="btnRestart">Relancer 45s</button>
+          <button class="btn-danger" id="btnStop">Stop</button>
+        </div>
+
+        <div class="smalllink">
+          Lien direct (si le QR ne marche pas) :<br>
+          <a id="directLink" href="#" target="_blank" rel="noreferrer">—</a>
+        </div>
+      </div>
+    </div>
+
   </div>
 
 <script>
-  // vote.html?vote=Vote1  -> question.html?vote=Vote1
-  const params = new URLSearchParams(window.location.search);
-  const vote = params.get("vote") || "Vote1";
+(function(){
+  // ----- Réglages -----
+  const DURATION = 45;
 
-  const target = `question.html?vote=${encodeURIComponent(vote)}&nocache=${Date.now()}`;
-  const link = document.getElementById("link");
-  link.href = target;
+  // Paramètre attendu: vote=Vote1..Vote8
+  const url = new URL(window.location.href);
+  const vote = url.searchParams.get("vote") || "Vote1"; // ex "Vote1"
 
-  // redirection auto
-  window.location.replace(target);
+  // Lien de vote (ton flux actuel)
+  // vote.html redirige vers question.html, mais on peut aussi pointer direct sur question.html
+  const voteLink = `question.html?vote=${encodeURIComponent(vote)}&nocache=${Date.now()}`;
+
+  // Page résultats (utilise poll=vote1..vote8)
+  const poll = ("vote" + String(vote).replace(/[^0-9]/g, "")) || "vote1"; // Vote1 -> vote1
+  const resultsLink = `resultat.html?poll=${encodeURIComponent(poll)}&nocache=${Date.now()}`;
+
+  // QR via Google Chart (simple et fiable)
+  const qrPayload = new URL(voteLink, window.location.href).toString();
+  const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chs=800x800&chld=H|1&chl=${encodeURIComponent(qrPayload)}`;
+
+  // ----- UI init -----
+  const h1 = document.getElementById("h1");
+  const pillVote = document.getElementById("pillVote");
+  const qr = document.getElementById("qr");
+  const directLink = document.getElementById("directLink");
+
+  h1.textContent = vote.replace("Vote","VOTE ");
+  pillVote.textContent = "Vote: " + vote.replace("Vote","VOTE ");
+  qr.src = qrUrl;
+  directLink.href = qrPayload;
+  directLink.textContent = qrPayload;
+
+  // Boutons
+  document.getElementById("btnResults").addEventListener("click", () => {
+    window.location.href = resultsLink;
+  });
+
+  // ----- Countdown -----
+  let remaining = DURATION;
+  let timer = null;
+  const secEl = document.getElementById("sec");
+  const barfill = document.getElementById("barfill");
+  const endedBox = document.getElementById("endedBox");
+  const subtitle = document.getElementById("subtitle");
+
+  function render(){
+    secEl.textContent = String(remaining);
+    barfill.style.transform = `scaleX(${Math.max(0, remaining / DURATION)})`;
+  }
+
+  function endVote(){
+    clearInterval(timer);
+    timer = null;
+    remaining = 0;
+    render();
+
+    endedBox.style.display = "block";
+    subtitle.textContent = "Vote terminé. Affichage des résultats…";
+
+    // petite pause pour que la salle voie "Vote terminé"
+    setTimeout(() => {
+      window.location.href = resultsLink;
+    }, 800);
+  }
+
+  function start(){
+    clearInterval(timer);
+    endedBox.style.display = "none";
+    subtitle.textContent = "Scannez le QR code et votez maintenant.";
+    remaining = DURATION;
+    render();
+
+    timer = setInterval(() => {
+      remaining -= 1;
+      render();
+      if (remaining <= 0) endVote();
+    }, 1000);
+  }
+
+  document.getElementById("btnRestart").addEventListener("click", start);
+  document.getElementById("btnStop").addEventListener("click", () => {
+    clearInterval(timer);
+    timer = null;
+    subtitle.textContent = "Vote en pause (STOP).";
+  });
+
+  // Start immediately
+  start();
+})();
 </script>
 </body>
 </html>
