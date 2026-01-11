@@ -29,8 +29,8 @@
 <script>
 (function(){
   try {
-    // ✅ Mets ici TON URL Apps Script /exec
-    var SCRIPT_URL = https://script.google.com/macros/s/AKfycbx4CGE-4a-dwso3ZeEcyj0YhQh1SmIZT-_MrRJvvVQxiGRYkcGGBrHJmPRQ2B7EVZMu/exec;
+    // ✅ TON URL Apps Script /exec (entre guillemets)
+    var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfHhgAvrqguR88WYrYNmbMcVeHikMl_c2RFJr-jLfhOhFGsW3nsISAuo7kGKCSYXtp/exec";
 
     var POLLS = {
       "Vote1": { q:"Aujourd’hui, la place donnée aux habitants dans les décisions locales est plutôt…",
@@ -100,19 +100,24 @@
       msgEl.className = "muted";
       msgEl.textContent = "Enregistrement du vote…";
 
-      var url = SCRIPT_URL + "?vote=" + encodeURIComponent(vote) + "&choice=" + encodeURIComponent(choice);
-
-      fetch(url).then(function(r){ return r.json(); }).then(function(data){
-        if (data && data.ok) {
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" }, // évite certains blocages CORS
+        body: JSON.stringify({ vote: vote, reponse: choice })
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (data && data.status === "ok") {
           localStorage.setItem(storageKey, "1");
           msgEl.className = "ok";
           msgEl.textContent = "Merci, votre vote a bien été pris en compte.";
           var btns = buttonsEl.querySelectorAll("button");
           for (var i=0;i<btns.length;i++) btns[i].disabled = true;
         } else {
-          showErr("Erreur : vote non enregistré (script).");
+          showErr("Erreur : vote non enregistré (API).");
         }
-      }).catch(function(){
+      })
+      .catch(function(){
         showErr("Erreur réseau. Réessayez.");
       });
     }
@@ -122,7 +127,6 @@
         var b = document.createElement("button");
         b.textContent = choice;
         b.onclick = function(){
-          // désactive tout de suite pour éviter double-clic
           var btns = buttonsEl.querySelectorAll("button");
           for (var i=0;i<btns.length;i++) btns[i].disabled = true;
           sendVote(choice);
