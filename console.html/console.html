@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Console Animateur – Démos Votes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0f0f10; --panel:#17171a; --text:#fff; --muted:rgba(255,255,255,.75);
+      --accent:#4caf50; --stroke:rgba(255,255,255,.12); --danger:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+      height:100vh; display:grid; grid-template-rows:auto 1fr;
+    }
+    header{
+      padding:12px 14px; background:var(--panel); border-bottom:1px solid var(--stroke);
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    }
+    .left{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+    .badge{
+      border:1px solid var(--stroke); background:rgba(255,255,255,.06);
+      padding:8px 10px; border-radius:999px; color:var(--muted); font-size:13px;
+    }
+    .actions{display:flex; gap:10px; flex-wrap:wrap}
+    button{
+      border:0; cursor:pointer; border-radius:12px; padding:10px 12px;
+      font-weight:700; font-size:14px;
+    }
+    .btn{background:rgba(255,255,255,.08); color:var(--text); border:1px solid var(--stroke)}
+    .btn-primary{background:var(--accent); color:#081108}
+    .btn-danger{background:rgba(255,107,107,.18); color:#ffd0d0; border:1px solid rgba(255,107,107,.35)}
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(8, minmax(90px, 1fr));
+      gap:10px;
+      padding:12px 14px;
+      background:var(--panel);
+      border-bottom:1px solid var(--stroke);
+    }
+    .voteBtn{
+      padding:12px 10px;
+      border-radius:14px;
+      background:rgba(255,255,255,.08);
+      border:1px solid var(--stroke);
+      color:var(--text);
+      font-weight:800;
+      letter-spacing:.5px;
+    }
+    .voteBtn.active{
+      outline:3px solid rgba(76,175,80,.55);
+      background:rgba(76,175,80,.14);
+    }
+    .stage{
+      position:relative;
+      display:grid;
+      grid-template-rows:auto 1fr;
+      height:100%;
+    }
+    .status{
+      padding:10px 14px; color:var(--muted); font-size:13px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      border-bottom:1px solid var(--stroke);
+      background:rgba(255,255,255,.02);
+    }
+    .status code{color:#9ad}
+    iframe{
+      width:100%;
+      height:100%;
+      border:0;
+      background:#000;
+    }
+    .hint{opacity:.65}
+    @media (max-width: 1100px){
+      .grid{grid-template-columns: repeat(4, minmax(90px, 1fr));}
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="left">
+      <div class="badge"><strong>Console Animateur</strong> – Lancer les votes individuellement</div>
+      <div class="badge">Vote en cours : <strong id="currentVote">—</strong></div>
+      <div class="badge">Mode : <strong id="mode">—</strong></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" id="btnShowVote">Afficher QR + 45s</button>
+      <button class="btn" id="btnShowResults">Afficher résultats</button>
+      <button class="btn" id="btnRestart45">Relancer 45s</button>
+      <button class="btn-danger" id="btnStop">Stop écran</button>
+    </div>
+  </header>
+
+  <div class="grid" id="voteGrid"></div>
+
+  <div class="stage">
+    <div class="status">
+      <div>
+        Écran projeté : <code id="screenUrl">—</code>
+        <span class="hint"> (astuce : tu peux faire F11 pour plein écran navigateur)</span>
+      </div>
+      <div class="hint">Les votes basculent automatiquement vers les résultats à la fin des 45s.</div>
+    </div>
+    <iframe id="screen" title="Écran salle"></iframe>
+  </div>
+
+<script>
+(function(){
+  const iframe = document.getElementById("screen");
+  const currentVoteEl = document.getElementById("currentVote");
+  const modeEl = document.getElementById("mode");
+  const screenUrlEl = document.getElementById("screenUrl");
+  const grid = document.getElementById("voteGrid");
+
+  // Vote actuel (1..8)
+  let current = 1;
+  let currentMode = "—";
+
+  // Helpers
+  const voteParam = (n) => `Vote${n}`;
+  const pollParam = (n) => `vote${n}`;
+  const nocache = () => `nocache=${Date.now()}`;
+
+  function setActiveButton(n){
+    [...grid.querySelectorAll("button")].forEach(b => b.classList.toggle("active", Number(b.dataset.n) === n));
+  }
+
+  function loadVote(n){
+    current = n;
+    setActiveButton(n);
+    currentVoteEl.textContent = `VOTE ${n}`;
+    showVote(); // par défaut, quand tu cliques VOTE n, on affiche QR + chrono
+  }
+
+  function setScreen(url, modeLabel){
+    currentMode = modeLabel;
+    modeEl.textContent = modeLabel;
+    screenUrlEl.textContent = url;
+    iframe.src = url;
+  }
+
+  // Actions écran
+  function showVote(){
+    const url = `vote.html?vote=${encodeURIComponent(voteParam(current))}&${nocache()}`;
+    setScreen(url, "QR + 45s");
+  }
+
+  function showResults(){
+    const url = `resultat.html?poll=${encodeURIComponent(pollParam(current))}&${nocache()}`;
+    setScreen(url, "Résultats");
+  }
+
+  function restart45(){
+    // relance simplement vote.html sur le vote courant (ça relance le chrono)
+    showVote();
+  }
+
+  function stopScreen(){
+    // écran noir (sans quitter la console)
+    const html = encodeURIComponent(`
+      <!doctype html><html><head><meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <style>body{margin:0;background:#000;color:#fff;font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;font-size:42px;}</style>
+      </head><body>PAUSE</body></html>
+    `);
+    setScreen(`data:text/html;charset=utf-8,${html}`, "Stop / Pause");
+  }
+
+  // Build buttons 1..8
+  for(let i=1;i<=8;i++){
+    const b = document.createElement("button");
+    b.className = "voteBtn";
+    b.textContent = `VOTE ${i}`;
+    b.dataset.n = String(i);
+    b.onclick = () => loadVote(i);
+    grid.appendChild(b);
+  }
+
+  // Wire top buttons
+  document.getElementById("btnShowVote").onclick = showVote;
+  document.getElementById("btnShowResults").onclick = showResults;
+  document.getElementById("btnRestart45").onclick = restart45;
+  document.getElementById("btnStop").onclick = stopScreen;
+
+  // Init on Vote 1
+  loadVote(1);
+})();
+</script>
+
+</body>
+</html>
