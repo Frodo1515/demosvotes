@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Vote</title>
   <style>
     body{font-family:system-ui,Arial,sans-serif;background:#111;color:#fff;margin:0;padding:24px}
-    .card{max-width:720px;margin:0 auto;background:#1b1b1b;border-radius:16px;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+    .card{max-width:760px;margin:0 auto;background:#1b1b1b;border-radius:16px;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
     h1{margin:0 0 10px;font-size:22px;text-align:center}
     .q{font-size:18px;line-height:1.35;margin:10px 0 12px}
     .opt{opacity:.9;margin:6px 0}
@@ -27,116 +27,118 @@
   </div>
 
 <script>
-  // ✅ Mets ici TON URL Apps Script /exec (la même que partout)
-  const SCRIPT_URL = https://script.google.com/macros/s/AKfycbx4CGE-4a-dwso3ZeEcyj0YhQh1SmIZT-_MrRJvvVQxiGRYkcGGBrHJmPRQ2B7EVZMu/exec;
+(function(){
+  try {
+    // ✅ Mets ici TON URL Apps Script /exec
+    var SCRIPT_URL = https://script.google.com/macros/s/AKfycbx4CGE-4a-dwso3ZeEcyj0YhQh1SmIZT-_MrRJvvVQxiGRYkcGGBrHJmPRQ2B7EVZMu/exec;
 
-  const POLLS = {
-    "Vote1": {
-      q: "Aujourd’hui, la place donnée aux habitants dans les décisions locales est plutôt…",
-      a: {A:"Satisfaisante",B:"Insuffisante",C:"Injuste ou déséquilibrée",D:"Je ne sais pas / je ne me prononce pas"}
-    },
-    "Vote2": {
-      q: "Quand la collectivité consulte les habitants, vous avez le sentiment que l’avis exprimé est…",
-      a: {A:"Réellement pris en compte",B:"Écouté mais rarement décisif",C:"Surtout symbolique",D:"Je n’ai jamais participé / je ne sais pas"}
-    },
-    "Vote3": {
-      q: "Sur quel type de décisions les habitants devraient-ils avoir le plus de poids ?",
-      a: {A:"Le cadre de vie et l’environnement",B:"Les services publics et le quotidien",C:"Les grands projets et orientations budgétaires",D:"Je ne sais pas / je n’y ai jamais réfléchi"}
-    },
-    "Vote4": {
-      q: "Pour vous, participer au développement de notre territoire, c’est avant tout…",
-      a: {A:"Participer à la création des projets de A à Z",B:"Donner votre avis, mais laisser les élus trancher",C:"Être informé et alerté en cas de soucis",D:"Je ne me sens pas concerné"}
-    },
-    "Vote5": {
-      q: "Une plateforme citoyenne sous la forme d’une application ou/et un site internet vous paraît…",
-      a: {A:"Indispensable aujourd’hui",B:"Utile, mais pas prioritaire",C:"Peu adaptée à notre territoire",D:"Je ne vois pas bien ce que c’est"}
-    },
-    "Vote6": {
-      q: "Ce qui vous donnerait le plus envie d’utiliser une plateforme citoyenne, ce serait…",
-      a: {A:"Être informé clairement des projets",B:"Pouvoir donner mon avis facilement",C:"Voir des décisions changer concrètement",D:"Les 3 réponses précédentes (ABC)",E:"Rien, je n’utiliserais pas ce type d’outil"}
-    },
-    "Vote7": {
-      q: "Une plateforme citoyenne devrait avant tout garantir…",
-      a: {A:"La transparence des décisions",B:"L’égalité de parole entre habitants",C:"Le suivi et les résultats concrets des projets",D:"Les 3 réponses précédentes (ABC)",E:"Je ne sais pas ce que j’en attends"}
-    },
-    "Vote8": {
-      q: "Si vos contributions à une plateforme citoyenne avaient un réel poids, vous seriez…",
-      a: {A:"Prêt à participer régulièrement",B:"Prêt à participer ponctuellement",C:"Peu ou pas intéressé",D:"Je préfère rester en dehors de ces démarches"}
+    var POLLS = {
+      "Vote1": { q:"Aujourd’hui, la place donnée aux habitants dans les décisions locales est plutôt…",
+        a:{A:"Satisfaisante",B:"Insuffisante",C:"Injuste ou déséquilibrée",D:"Je ne sais pas / je ne me prononce pas"} },
+      "Vote2": { q:"Quand la collectivité consulte les habitants, vous avez le sentiment que l’avis exprimé est…",
+        a:{A:"Réellement pris en compte",B:"Écouté mais rarement décisif",C:"Surtout symbolique",D:"Je n’ai jamais participé / je ne sais pas"} },
+      "Vote3": { q:"Sur quel type de décisions les habitants devraient-ils avoir le plus de poids ?",
+        a:{A:"Le cadre de vie et l’environnement",B:"Les services publics et le quotidien",C:"Les grands projets et orientations budgétaires",D:"Je ne sais pas / je n’y ai jamais réfléchi"} },
+      "Vote4": { q:"Pour vous, participer au développement de notre territoire, c’est avant tout…",
+        a:{A:"Participer à la création des projets de A à Z",B:"Donner votre avis, mais laisser les élus trancher",C:"Être informé et alerté en cas de soucis",D:"Je ne me sens pas concerné"} },
+      "Vote5": { q:"Une plateforme citoyenne sous la forme d’une application ou/et un site internet vous paraît…",
+        a:{A:"Indispensable aujourd’hui",B:"Utile, mais pas prioritaire",C:"Peu adaptée à notre territoire",D:"Je ne vois pas bien ce que c’est"} },
+      "Vote6": { q:"Ce qui vous donnerait le plus envie d’utiliser une plateforme citoyenne, ce serait…",
+        a:{A:"Être informé clairement des projets",B:"Pouvoir donner mon avis facilement",C:"Voir des décisions changer concrètement",D:"Les 3 réponses précédentes (ABC)",E:"Rien, je n’utiliserais pas ce type d’outil"} },
+      "Vote7": { q:"Une plateforme citoyenne devrait avant tout garantir…",
+        a:{A:"La transparence des décisions",B:"L’égalité de parole entre habitants",C:"Le suivi et les résultats concrets des projets",D:"Les 3 réponses précédentes (ABC)",E:"Je ne sais pas ce que j’en attends"} },
+      "Vote8": { q:"Si vos contributions à une plateforme citoyenne avaient un réel poids, vous seriez…",
+        a:{A:"Prêt à participer régulièrement",B:"Prêt à participer ponctuellement",C:"Peu ou pas intéressé",D:"Je préfère rester en dehors de ces démarches"} }
+    };
+
+    function qs(name){
+      var m = new RegExp("[?&]"+name+"=([^&]+)").exec(location.search);
+      return m ? decodeURIComponent(m[1]) : null;
     }
-  };
 
-  const params = new URLSearchParams(location.search);
-  const vote = params.get("vote"); // ex: Vote1
+    var vote = qs("vote"); // ex Vote1
+    var titleEl = document.getElementById("title");
+    var qEl = document.getElementById("question");
+    var labelsEl = document.getElementById("labels");
+    var buttonsEl = document.getElementById("buttons");
+    var msgEl = document.getElementById("msg");
 
-  const titleEl = document.getElementById("title");
-  const qEl = document.getElementById("question");
-  const labelsEl = document.getElementById("labels");
-  const buttonsEl = document.getElementById("buttons");
-  const msgEl = document.getElementById("msg");
+    function showErr(t){
+      msgEl.className = "no";
+      msgEl.textContent = t;
+    }
 
-  function renderError(t){
-    titleEl.textContent = "Lien invalide";
-    msgEl.className = "no";
-    msgEl.textContent = t;
-  }
+    if (!vote || !POLLS[vote]) {
+      titleEl.textContent = "Lien invalide";
+      showErr("Paramètre vote manquant ou inconnu. (ex: ?vote=Vote1)");
+      return;
+    }
 
-  if (!vote || !POLLS[vote]) {
-    renderError("Paramètre vote manquant ou inconnu.");
-  } else {
-    const conf = POLLS[vote];
+    var conf = POLLS[vote];
     titleEl.textContent = vote.replace("Vote","VOTE ");
     qEl.textContent = conf.q;
 
-    // Afficher les libellés A/B/C...
     labelsEl.innerHTML = "";
-    Object.keys(conf.a).forEach(k=>{
-      const d=document.createElement("div");
-      d.className="opt";
-      d.innerHTML = `<strong>${k}</strong> — ${conf.a[k]}`;
+    for (var k in conf.a) {
+      var d = document.createElement("div");
+      d.className = "opt";
+      d.innerHTML = "<strong>"+k+"</strong> — "+conf.a[k];
       labelsEl.appendChild(d);
-    });
+    }
 
-    const storageKey = "voted_" + vote;
+    var storageKey = "voted_" + vote;
     if (localStorage.getItem(storageKey)) {
       msgEl.className = "no";
       msgEl.textContent = "Vous avez déjà voté pour cette question.";
-    } else {
-      const choices = Object.keys(conf.a);
-      choices.forEach(ch => {
-        const b = document.createElement("button");
-        b.textContent = ch;
-        b.onclick = async () => {
-          try {
-            b.disabled = true;
-            msgEl.className = "muted";
-            msgEl.textContent = "Enregistrement du vote…";
+      return;
+    }
 
-            const r = await fetch(`${SCRIPT_URL}?vote=${encodeURIComponent(vote)}&choice=${encodeURIComponent(ch)}`);
-            const data = await r.json();
+    msgEl.className = "muted";
+    msgEl.textContent = "Choisissez une réponse. (1 vote par téléphone)";
 
-            if (data && data.ok) {
-              localStorage.setItem(storageKey, "1");
-              msgEl.className = "ok";
-              msgEl.textContent = "Merci, votre vote a bien été pris en compte.";
-              buttonsEl.querySelectorAll("button").forEach(x => x.disabled = true);
-            } else {
-              msgEl.className = "no";
-              msgEl.textContent = "Erreur : vote non enregistré.";
-              b.disabled = false;
-            }
-          } catch (e) {
-            msgEl.className = "no";
-            msgEl.textContent = "Erreur réseau. Réessayez.";
-            b.disabled = false;
-          }
+    function sendVote(choice){
+      msgEl.className = "muted";
+      msgEl.textContent = "Enregistrement du vote…";
+
+      var url = SCRIPT_URL + "?vote=" + encodeURIComponent(vote) + "&choice=" + encodeURIComponent(choice);
+
+      fetch(url).then(function(r){ return r.json(); }).then(function(data){
+        if (data && data.ok) {
+          localStorage.setItem(storageKey, "1");
+          msgEl.className = "ok";
+          msgEl.textContent = "Merci, votre vote a bien été pris en compte.";
+          var btns = buttonsEl.querySelectorAll("button");
+          for (var i=0;i<btns.length;i++) btns[i].disabled = true;
+        } else {
+          showErr("Erreur : vote non enregistré (script).");
+        }
+      }).catch(function(){
+        showErr("Erreur réseau. Réessayez.");
+      });
+    }
+
+    for (var c in conf.a) {
+      (function(choice){
+        var b = document.createElement("button");
+        b.textContent = choice;
+        b.onclick = function(){
+          // désactive tout de suite pour éviter double-clic
+          var btns = buttonsEl.querySelectorAll("button");
+          for (var i=0;i<btns.length;i++) btns[i].disabled = true;
+          sendVote(choice);
         };
         buttonsEl.appendChild(b);
-      });
+      })(c);
+    }
 
-      msgEl.className = "muted";
-      msgEl.textContent = "Choisissez une réponse. (1 vote par téléphone)";
+  } catch (e) {
+    var msgEl2 = document.getElementById("msg");
+    if (msgEl2) {
+      msgEl2.className = "no";
+      msgEl2.textContent = "Erreur technique dans la page (JS).";
     }
   }
+})();
 </script>
 </body>
 </html>
