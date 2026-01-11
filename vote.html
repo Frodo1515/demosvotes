@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Vote en cours…</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: system-ui, Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      margin: 0;
+    }
+    .box {
+      max-width: 420px;
+      padding: 20px;
+    }
+    .ok {
+      color: #4caf50;
+      font-size: 1.2rem;
+    }
+    .no {
+      color: #ff6b6b;
+      font-size: 1.2rem;
+    }
+    .small {
+      opacity: 0.8;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="box" id="msg">Vote en cours…</div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const vote = params.get('vote');     // ex: Vote1
+    const choice = params.get('choice'); // ex: A
+
+    if (!vote || !choice) {
+      document.getElementById('msg').innerHTML =
+        "<div class='no'>Lien de vote invalide.</div>";
+    } else {
+      const storageKey = "voted_" + vote;
+
+      if (localStorage.getItem(storageKey)) {
+        document.getElementById('msg').innerHTML =
+          "<div class='no'>Vous avez déjà voté pour cette question.</div>" +
+          "<div class='small'>Merci pour votre participation.</div>";
+      } else {
+        // 🔴 COLLE ICI TON URL APPS SCRIPT /exec
+        const SCRIPT_URL = https://script.google.com/macros/s/AKfycbx4CGE-4a-dwso3ZeEcyj0YhQh1SmIZT-_MrRJvvVQxiGRYkcGGBrHJmPRQ2B7EVZMu/exec;
+
+        fetch(`${SCRIPT_URL}?vote=${encodeURIComponent(vote)}&choice=${encodeURIComponent(choice)}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data && data.ok) {
+              localStorage.setItem(storageKey, "1");
+              document.getElementById('msg').innerHTML =
+                "<div class='ok'>Merci, votre vote a bien été pris en compte.</div>" +
+                "<div class='small'>Vous pouvez fermer cette page.</div>";
+            } else {
+              document.getElementById('msg').innerHTML =
+                "<div class='no'>Erreur lors de l’enregistrement du vote.</div>";
+            }
+          })
+          .catch(() => {
+            document.getElementById('msg').innerHTML =
+              "<div class='no'>Erreur réseau. Veuillez réessayer.</div>";
+          });
+      }
+    }
+  </script>
+</body>
+</html>
