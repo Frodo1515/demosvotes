@@ -1,147 +1,442 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Vote en cours</title>
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="pragma" content="no-cache">
-  <meta http-equiv="expires" content="0">
+  <title>Vote – Affichage</title>
+
   <style>
     :root{
-      --bg:#0f0f10; --card:#17171a; --text:#fff; --muted:rgba(255,255,255,.75);
-      --accent:#4caf50; --stroke:rgba(255,255,255,.12);
+      --bg:#0b1020;
+      --card:#121a33;
+      --muted:#9aa7c7;
+      --text:#ffffff;
+      --accent:#4fd1c5;
+      --danger:#ff6b6b;
+      --border:rgba(255,255,255,.12);
     }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);
-      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-    .wrap{width:min(1100px,100%);display:grid;gap:18px;}
-    .top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;}
-    .title{display:flex;flex-direction:column;gap:6px}
-    h1{margin:0;font-size:clamp(28px,3vw,46px);letter-spacing:.5px}
-    .subtitle{margin:0;color:var(--muted);font-size:clamp(14px,1.6vw,18px)}
-    .card{background:var(--card);border:1px solid var(--stroke);border-radius:22px;padding:18px}
-    .timer{min-width:280px}
-    .timer .label{color:var(--muted);font-size:14px}
-    .timer .seconds{font-variant-numeric:tabular-nums;font-size:42px;font-weight:800;letter-spacing:1px}
-    .bar{width:100%;height:10px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;margin-top:8px}
-    .bar>div{height:100%;width:100%;background:var(--accent);transform-origin:left;transform:scaleX(1);transition:transform .25s linear}
-    .main{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
-    @media(max-width:860px){.main{grid-template-columns:1fr}.timer{min-width:unset;width:100%}}
-    .qrbox{display:flex;align-items:center;justify-content:center;min-height:520px}
-    .qrimg{width:min(520px,100%);aspect-ratio:1/1;border-radius:18px;background:#fff;padding:16px;display:flex;align-items:center;justify-content:center}
-    .qrimg img{width:100%;height:100%;object-fit:contain}
-    .right{display:flex;flex-direction:column;gap:14px}
-    .pillrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
-    .pill{border:1px solid var(--stroke);background:rgba(255,255,255,.06);padding:8px 10px;border-radius:999px;font-size:13px;color:var(--muted)}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto}
-    button{border:0;border-radius:14px;padding:12px 14px;font-size:15px;cursor:pointer;font-weight:650}
-    .btn-primary{background:var(--accent);color:#081108}
-    .btn-ghost{background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--stroke)}
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(79,209,197,.15), transparent 60%),
+                  radial-gradient(900px 600px at 90% 30%, rgba(154,167,199,.12), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+    }
+    header{
+      padding:18px 22px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .title{
+      font-size:20px;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .meta{
+      color:var(--muted);
+      font-size:14px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .pill{
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.05);
+      padding:6px 10px;
+      border-radius:999px;
+    }
+
+    main{
+      padding:22px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 430px 1fr;
+      gap:22px;
+      align-items:stretch;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: rgba(255,255,255,.04);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      backdrop-filter: blur(6px);
+      min-height: 520px;
+    }
+
+    .qrWrap{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      height:100%;
+    }
+    .qrBox{
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:16px;
+      background: rgba(0,0,0,.18);
+      border:1px dashed rgba(255,255,255,.18);
+      padding:16px;
+    }
+    .qrBox img{
+      max-width:100%;
+      max-height: 440px;
+      object-fit:contain;
+      image-rendering: auto;
+    }
+    .qrCaption{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .qrLabel{
+      font-weight:800;
+      font-size:22px;
+      letter-spacing:.6px;
+    }
+    .small{
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .questionTitle{
+      font-size:26px;
+      font-weight:800;
+      line-height:1.2;
+      margin:0 0 14px 0;
+    }
+    .options{
+      display:grid;
+      gap:12px;
+      margin-top:14px;
+    }
+    .opt{
+      padding:14px 14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      font-size:18px;
+      line-height:1.25;
+    }
+
+    .timerRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:18px;
+      flex-wrap:wrap;
+    }
+    .timer{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+    }
+    .timer .num{
+      font-size:34px;
+      font-weight:900;
+      color:var(--accent);
+      min-width: 64px;
+      text-align:right;
+    }
+    .timer .unit{
+      color:var(--muted);
+      font-weight:600;
+    }
+
+    .btns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    button{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:14px;
+      font-weight:800;
+      cursor:pointer;
+      font-size:14px;
+    }
+    button:hover{ background: rgba(255,255,255,.10); }
+    .danger{
+      border-color: rgba(255,107,107,.35);
+      background: rgba(255,107,107,.12);
+    }
+    .danger:hover{ background: rgba(255,107,107,.18); }
+
+    .hint{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .error{
+      color:#ffd1d1;
+      background: rgba(255,107,107,.12);
+      border:1px solid rgba(255,107,107,.35);
+      padding:10px 12px;
+      border-radius:14px;
+      margin-top:12px;
+      display:none;
+    }
+    .topRight{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .select{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:12px;
+      font-weight:700;
+    }
+    a{ color: var(--accent); text-decoration: none; }
+    a:hover{ text-decoration: underline; }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="top">
-      <div class="title">
-        <h1 id="h1">VOTE</h1>
-        <p class="subtitle" id="subtitle">Scannez le QR code et votez maintenant.</p>
-      </div>
-
-      <div class="timer card">
-        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px;">
-          <div class="label">Temps restant</div>
-          <div class="seconds"><span id="sec">45</span>s</div>
-        </div>
-        <div class="bar"><div id="barfill"></div></div>
+  <header>
+    <div>
+      <div class="title">DÉMOS – Affichage du vote</div>
+      <div class="meta">
+        <span class="pill">QR à gauche · Question à droite · 45 s</span>
+        <span class="pill">URL : <span id="urlEcho"></span></span>
       </div>
     </div>
 
-    <div class="main">
-      <div class="card qrbox">
-        <div class="qrimg">
-          <img id="qr" alt="QR Code">
-        </div>
-      </div>
-
-      <div class="card right">
-        <div class="pillrow">
-          <div class="pill" id="pillVote">Vote: —</div>
-          <div class="pill">Durée: 45 sec</div>
-          <div class="pill">Résultats: en direct</div>
-        </div>
-
-        <div class="actions">
-          <button class="btn-primary" id="btnResults">Afficher les résultats</button>
-          <button class="btn-ghost" id="btnRestart">Relancer 45s</button>
-        </div>
-
-        <div style="color:rgba(255,255,255,.75);font-size:14px;line-height:1.5">
-          Astuce : tu peux aussi afficher ces QR codes sur papier.<br>
-          URL : <code>vote.html?vote=Vote1</code> … <code>Vote8</code>
-        </div>
-      </div>
+    <div class="topRight">
+      <label class="meta" for="voteSelect">Vote :</label>
+      <select id="voteSelect" class="select">
+        <option value="1">Vote 1</option>
+        <option value="2">Vote 2</option>
+        <option value="3">Vote 3</option>
+        <option value="4">Vote 4</option>
+        <option value="5">Vote 5</option>
+        <option value="6">Vote 6</option>
+        <option value="7">Vote 7</option>
+        <option value="8">Vote 8</option>
+      </select>
+      <button id="applyVoteBtn">Afficher</button>
     </div>
-  </div>
+  </header>
 
-<script>
-(function(){
-  const DURATION = 45;
+  <main>
+    <div class="grid">
+      <!-- LEFT: QR -->
+      <section class="card">
+        <div class="qrWrap">
+          <div class="qrBox">
+            <img id="qrImg" alt="QR Code du vote" />
+          </div>
+          <div class="qrCaption">
+            <div>
+              <div class="qrLabel" id="qrLabel">VOTE 1</div>
+              <div class="small">Scannez pour voter sur votre téléphone</div>
+            </div>
+            <div class="small">
+              Image : <span id="qrPath"></span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-  const u = new URL(window.location.href);
-  const vote = u.searchParams.get("vote") || "Vote1"; // Vote1..Vote8
-  const n = (vote.match(/\d+/) || ["1"])[0];          // "1".."8"
+      <!-- RIGHT: QUESTION -->
+      <section class="card">
+        <h1 class="questionTitle" id="qTitle">Chargement…</h1>
 
-  // Affichage du bon PNG (dossier /qrs/)
-  const qrImg = document.getElementById("qr");
-  qrImg.src = `qrs/VOTE_${n}.png?nocache=${Date.now()}`;
+        <div class="options" id="qOptions"></div>
 
-  // Résultats (poll=vote1..vote8)
-  const poll = `vote${n}`;
-  const resultsLink = `resultat.html?poll=${encodeURIComponent(poll)}&nocache=${Date.now()}`;
+        <div class="timerRow">
+          <div class="timer" aria-live="polite">
+            <div class="num" id="timeLeft">45</div>
+            <div class="unit">secondes</div>
+          </div>
 
-  // UI
-  document.getElementById("h1").textContent = vote.replace("Vote","VOTE ");
-  document.getElementById("pillVote").textContent = "Vote: " + vote.replace("Vote","VOTE ");
+          <div class="btns">
+            <button class="danger" id="stopBtn">STOP</button>
+            <button id="restartBtn">RELANCER (45s)</button>
+            <button id="toResultsBtn">Aller aux résultats</button>
+          </div>
+        </div>
 
-  document.getElementById("btnResults").onclick = () => location.href = resultsLink;
+        <div class="hint">
+          Astuce : tu peux aussi changer le vote dans l’URL : <code>?vote=1</code> … <code>?vote=8</code>
+        </div>
 
-  // Countdown
-  let remaining = DURATION;
-  let timer = null;
-  const secEl = document.getElementById("sec");
-  const barfill = document.getElementById("barfill");
-  const subtitle = document.getElementById("subtitle");
+        <div class="error" id="errBox"></div>
+      </section>
+    </div>
+  </main>
 
-  function render(){
-    secEl.textContent = String(remaining);
-    barfill.style.transform = `scaleX(${Math.max(0, remaining / DURATION)})`;
-  }
+  <!-- Données des questions -->
+  <script src="./polls.js"></script>
 
-  function endVote(){
-    clearInterval(timer); timer=null;
-    remaining = 0; render();
-    subtitle.textContent = "Vote terminé. Affichage des résultats…";
-    setTimeout(() => location.href = resultsLink, 800);
-  }
+  <script>
+    (function(){
+      const DEFAULT_DURATION = 45;
 
-  function start(){
-    clearInterval(timer);
-    remaining = DURATION;
-    subtitle.textContent = "Scannez le QR code et votez maintenant.";
-    render();
-    timer = setInterval(() => {
-      remaining--;
-      render();
-      if (remaining <= 0) endVote();
-    }, 1000);
-  }
+      const $ = (id) => document.getElementById(id);
 
-  document.getElementById("btnRestart").onclick = start;
+      const url = new URL(window.location.href);
+      $("urlEcho").textContent = url.pathname + url.search;
 
-  start();
-})();
-</script>
+      const errBox = $("errBox");
+
+      // Lire ?vote=1..8 (ou Vote1/VOTE_1 etc, on tolère)
+      function parseVoteParam() {
+        let v = url.searchParams.get("vote") || "1";
+        v = String(v).trim();
+        // accepte "Vote1" "VOTE_1" "1"
+        const m = v.match(/(\d+)/);
+        const n = m ? parseInt(m[1], 10) : 1;
+        return (n >= 1 && n <= 8) ? n : 1;
+      }
+
+      function padVoteLabel(n){
+        return `VOTE ${n}`;
+      }
+
+      function qrImagePath(n){
+        // Dossier qrs + nom VOTE_1.png
+        return `./qrs/VOTE_${n}.png`;
+      }
+
+      function renderVote(n){
+        // Label / Select
+        $("qrLabel").textContent = padVoteLabel(n);
+        $("voteSelect").value = String(n);
+
+        // QR
+        const path = qrImagePath(n);
+        $("qrPath").textContent = path;
+        $("qrImg").src = path;
+
+        // Question
+        const polls = window.POLLS || {};
+        const poll = polls[n];
+
+        if(!poll){
+          showError(`Aucune question trouvée pour le vote ${n}. Vérifie polls.js (window.POLLS[${n}]).`);
+          $("qTitle").textContent = `Vote ${n} : question manquante`;
+          $("qOptions").innerHTML = "";
+          return;
+        }
+
+        hideError();
+        $("qTitle").textContent = poll.title || `Vote ${n}`;
+        $("qOptions").innerHTML = "";
+
+        (poll.options || []).forEach((txt) => {
+          const div = document.createElement("div");
+          div.className = "opt";
+          div.textContent = txt;
+          $("qOptions").appendChild(div);
+        });
+      }
+
+      function showError(msg){
+        errBox.style.display = "block";
+        errBox.textContent = msg;
+      }
+      function hideError(){
+        errBox.style.display = "none";
+        errBox.textContent = "";
+      }
+
+      // Timer
+      let remaining = DEFAULT_DURATION;
+      let intervalId = null;
+
+      function updateTimer(){
+        $("timeLeft").textContent = String(remaining);
+        if(remaining <= 10){
+          $("timeLeft").style.color = "var(--danger)";
+        } else {
+          $("timeLeft").style.color = "var(--accent)";
+        }
+      }
+
+      function startTimer(){
+        stopTimer();
+        intervalId = setInterval(() => {
+          remaining -= 1;
+          updateTimer();
+          if(remaining <= 0){
+            stopTimer();
+            // Optionnel : bascule auto vers résultats
+            // Décommente la ligne suivante si tu veux l'auto-bascule :
+            // goToResults();
+          }
+        }, 1000);
+      }
+
+      function stopTimer(){
+        if(intervalId){
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+      }
+
+      function resetTimer(){
+        remaining = DEFAULT_DURATION;
+        updateTimer();
+      }
+
+      function goToResults(){
+        const currentVote = parseInt($("voteSelect").value, 10) || 1;
+        // adapte ici si ton fichier s'appelle resultat.html ou resultats.html
+        window.location.href = `./resultats.html?vote=${currentVote}`;
+      }
+
+      // UI events
+      $("stopBtn").addEventListener("click", () => {
+        stopTimer();
+      });
+
+      $("restartBtn").addEventListener("click", () => {
+        resetTimer();
+        startTimer();
+      });
+
+      $("toResultsBtn").addEventListener("click", () => {
+        goToResults();
+      });
+
+      $("applyVoteBtn").addEventListener("click", () => {
+        const n = parseInt($("voteSelect").value, 10) || 1;
+        // On recharge la page avec le bon paramètre pour que l'URL reflète le vote
+        window.location.href = `./vote.html?vote=${n}`;
+      });
+
+      // Init
+      const voteN = parseVoteParam();
+      renderVote(voteN);
+      resetTimer();
+      startTimer();
+    })();
+  </script>
 </body>
 </html>

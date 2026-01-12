@@ -1,148 +1,177 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Vote</title>
   <style>
-    body{font-family:system-ui,Arial,sans-serif;background:#111;color:#fff;margin:0;padding:24px}
-    .card{max-width:760px;margin:0 auto;background:#1b1b1b;border-radius:16px;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
-    h1{margin:0 0 10px;font-size:22px;text-align:center}
-    .q{font-size:18px;line-height:1.35;margin:10px 0 12px}
-    .opt{opacity:.9;margin:6px 0}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-    button{font-size:20px;padding:16px;border-radius:14px;border:0;cursor:pointer}
-    .ok{color:#4caf50;text-align:center;margin-top:14px}
-    .no{color:#ff6b6b;text-align:center;margin-top:14px}
-    .muted{opacity:.75;font-size:13px;text-align:center;margin-top:10px}
+    :root{ --bg:#0b1020; --card:#121a33; --muted:#9aa7c7; --text:#fff; --border:rgba(255,255,255,.12); --accent:#4fd1c5; }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background: radial-gradient(900px 600px at 20% 10%, rgba(79,209,197,.18), transparent 60%),
+                  radial-gradient(900px 600px at 90% 20%, rgba(154,167,199,.12), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+      padding:18px;
+    }
+    .card{
+      max-width:720px; margin:0 auto;
+      background: rgba(255,255,255,.04);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      backdrop-filter: blur(6px);
+    }
+    .meta{ color:var(--muted); font-size:13px; display:flex; gap:10px; flex-wrap:wrap; }
+    .pill{ border:1px solid var(--border); background:rgba(255,255,255,.05); padding:6px 10px; border-radius:999px; }
+    h1{ margin:12px 0 0; font-size:22px; line-height:1.25; }
+    .opts{ display:grid; gap:12px; margin-top:16px; }
+    button.opt{
+      width:100%;
+      text-align:left;
+      padding:14px 14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      font-size:16px;
+      font-weight:800;
+      cursor:pointer;
+    }
+    button.opt:disabled{ opacity:.6; cursor:not-allowed; }
+    .ok{
+      margin-top:14px;
+      border:1px solid rgba(79,209,197,.35);
+      background: rgba(79,209,197,.12);
+      padding:12px;
+      border-radius:14px;
+      display:none;
+      white-space:pre-wrap;
+    }
+    .err{
+      margin-top:14px;
+      border:1px solid rgba(255,107,107,.35);
+      background: rgba(255,107,107,.12);
+      padding:12px;
+      border-radius:14px;
+      display:none;
+      white-space:pre-wrap;
+    }
+    .small{ margin-top:10px; color:var(--muted); font-size:12px; }
+    a{ color: var(--accent); text-decoration:none; }
+    a:hover{ text-decoration:underline; }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1 id="title">Vote</h1>
-    <div class="q" id="question"></div>
-    <div id="labels"></div>
-    <div class="grid" id="buttons"></div>
-    <div id="msg" class="muted"></div>
+    <div class="meta">
+      <span class="pill">DÉMOS</span>
+      <span class="pill">Vote <span id="voteLabel">?</span></span>
+    </div>
+
+    <h1 id="qTitle">Chargement…</h1>
+    <div class="opts" id="opts"></div>
+
+    <div class="ok" id="okBox"></div>
+    <div class="err" id="errBox"></div>
+
+    <div class="small" id="lockInfo"></div>
   </div>
 
-<script>
-(function(){
-  try {
-    // ✅ TON URL Apps Script /exec (entre guillemets)
-    var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfHhgAvrqguR88WYrYNmbMcVeHikMl_c2RFJr-jLfhOhFGsW3nsISAuo7kGKCSYXtp/exec";
+  <script src="./polls.js"></script>
+  <script>
+    (function(){
+      // ✅ URL Apps Script (POST)
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfHhgAvrqguR88WYrYNmbMcVeHikMl_c2RFJr-jLfhOhFGsW3nsISAuo7kGKCSYXtp/exec";
 
-    var POLLS = {
-      "Vote1": { q:"Aujourd’hui, la place donnée aux habitants dans les décisions locales est plutôt…",
-        a:{A:"Satisfaisante",B:"Insuffisante",C:"Injuste ou déséquilibrée",D:"Je ne sais pas / je ne me prononce pas"} },
-      "Vote2": { q:"Quand la collectivité consulte les habitants, vous avez le sentiment que l’avis exprimé est…",
-        a:{A:"Réellement pris en compte",B:"Écouté mais rarement décisif",C:"Surtout symbolique",D:"Je n’ai jamais participé / je ne sais pas"} },
-      "Vote3": { q:"Sur quel type de décisions les habitants devraient-ils avoir le plus de poids ?",
-        a:{A:"Le cadre de vie et l’environnement",B:"Les services publics et le quotidien",C:"Les grands projets et orientations budgétaires",D:"Je ne sais pas / je n’y ai jamais réfléchi"} },
-      "Vote4": { q:"Pour vous, participer au développement de notre territoire, c’est avant tout…",
-        a:{A:"Participer à la création des projets de A à Z",B:"Donner votre avis, mais laisser les élus trancher",C:"Être informé et alerté en cas de soucis",D:"Je ne me sens pas concerné"} },
-      "Vote5": { q:"Une plateforme citoyenne sous la forme d’une application ou/et un site internet vous paraît…",
-        a:{A:"Indispensable aujourd’hui",B:"Utile, mais pas prioritaire",C:"Peu adaptée à notre territoire",D:"Je ne vois pas bien ce que c’est"} },
-      "Vote6": { q:"Ce qui vous donnerait le plus envie d’utiliser une plateforme citoyenne, ce serait…",
-        a:{A:"Être informé clairement des projets",B:"Pouvoir donner mon avis facilement",C:"Voir des décisions changer concrètement",D:"Les 3 réponses précédentes (ABC)",E:"Rien, je n’utiliserais pas ce type d’outil"} },
-      "Vote7": { q:"Une plateforme citoyenne devrait avant tout garantir…",
-        a:{A:"La transparence des décisions",B:"L’égalité de parole entre habitants",C:"Le suivi et les résultats concrets des projets",D:"Les 3 réponses précédentes (ABC)",E:"Je ne sais pas ce que j’en attends"} },
-      "Vote8": { q:"Si vos contributions à une plateforme citoyenne avaient un réel poids, vous seriez…",
-        a:{A:"Prêt à participer régulièrement",B:"Prêt à participer ponctuellement",C:"Peu ou pas intéressé",D:"Je préfère rester en dehors de ces démarches"} }
-    };
+      const $ = (id) => document.getElementById(id);
+      const url = new URL(location.href);
 
-    function qs(name){
-      var m = new RegExp("[?&]"+name+"=([^&]+)").exec(location.search);
-      return m ? decodeURIComponent(m[1]) : null;
-    }
+      function parseVote(){
+        // accepte ?vote=1 ou ?vote=Vote1 etc.
+        const raw = String(url.searchParams.get("vote") || "1");
+        const m = raw.match(/(\d+)/);
+        const n = m ? parseInt(m[1], 10) : 1;
+        return (n>=1 && n<=8) ? n : 1;
+      }
 
-    var vote = qs("vote"); // ex Vote1
-    var titleEl = document.getElementById("title");
-    var qEl = document.getElementById("question");
-    var labelsEl = document.getElementById("labels");
-    var buttonsEl = document.getElementById("buttons");
-    var msgEl = document.getElementById("msg");
+      const vote = parseVote();
+      $("voteLabel").textContent = vote;
 
-    function showErr(t){
-      msgEl.className = "no";
-      msgEl.textContent = t;
-    }
+      const poll = (window.POLLS || {})[vote];
+      if(!poll){
+        $("qTitle").textContent = "Question introuvable.";
+        $("errBox").style.display = "block";
+        $("errBox").textContent = `Aucune question pour vote=${vote} dans polls.js`;
+        return;
+      }
 
-    if (!vote || !POLLS[vote]) {
-      titleEl.textContent = "Lien invalide";
-      showErr("Paramètre vote manquant ou inconnu. (ex: ?vote=Vote1)");
-      return;
-    }
+      $("qTitle").textContent = poll.title;
+      const opts = $("opts");
+      opts.innerHTML = "";
 
-    var conf = POLLS[vote];
-    titleEl.textContent = vote.replace("Vote","VOTE ");
-    qEl.textContent = conf.q;
+      // Anti double-vote simple (localStorage) : 1 vote max par téléphone par question
+      const lockKey = `DEMOS_VOTE_LOCK_${vote}`;
+      const locked = localStorage.getItem(lockKey) === "1";
+      if(locked){
+        $("lockInfo").textContent = "Vous avez déjà voté pour cette question sur ce téléphone.";
+      }
 
-    labelsEl.innerHTML = "";
-    for (var k in conf.a) {
-      var d = document.createElement("div");
-      d.className = "opt";
-      d.innerHTML = "<strong>"+k+"</strong> — "+conf.a[k];
-      labelsEl.appendChild(d);
-    }
+      function setAllDisabled(disabled){
+        [...document.querySelectorAll("button.opt")].forEach(b => b.disabled = disabled);
+      }
 
-    var storageKey = "voted_" + vote;
-    if (localStorage.getItem(storageKey)) {
-      msgEl.className = "no";
-      msgEl.textContent = "Vous avez déjà voté pour cette question.";
-      return;
-    }
+      async function send(choiceLetter){
+        $("okBox").style.display = "none";
+        $("errBox").style.display = "none";
 
-    msgEl.className = "muted";
-    msgEl.textContent = "Choisissez une réponse. (1 vote par téléphone)";
+        setAllDisabled(true);
 
-    function sendVote(choice){
-      msgEl.className = "muted";
-      msgEl.textContent = "Enregistrement du vote…";
+        try{
+          const endpoint = `${SCRIPT_URL}?vote=${encodeURIComponent(vote)}&choice=${encodeURIComponent(choiceLetter)}`;
+          const res = await fetch(endpoint, { method: "POST" });
+          const txt = await res.text();
 
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" }, // évite certains blocages CORS
-        body: JSON.stringify({ vote: vote, reponse: choice })
-      })
-      .then(function(r){ return r.json(); })
-      .then(function(data){
-        if (data && data.status === "ok") {
-          localStorage.setItem(storageKey, "1");
-          msgEl.className = "ok";
-          msgEl.textContent = "Merci, votre vote a bien été pris en compte.";
-          var btns = buttonsEl.querySelectorAll("button");
-          for (var i=0;i<btns.length;i++) btns[i].disabled = true;
-        } else {
-          showErr("Erreur : vote non enregistré (API).");
+          // Essaye JSON, sinon affiche texte brut
+          let data = null;
+          try { data = JSON.parse(txt); } catch(e){}
+
+          if(data && data.status === "ok"){
+            localStorage.setItem(lockKey, "1");
+            $("lockInfo").textContent = "Vote enregistré. Merci !";
+            $("okBox").style.display = "block";
+            $("okBox").textContent = `✅ Merci ! Votre vote (${choiceLetter}) a été pris en compte.`;
+            return;
+          }
+
+          $("errBox").style.display = "block";
+          $("errBox").textContent = "Erreur renvoyée par le serveur:\n" + (data ? JSON.stringify(data, null, 2) : txt);
+
+          setAllDisabled(false);
+        }catch(err){
+          $("errBox").style.display = "block";
+          $("errBox").textContent = "Erreur réseau:\n" + err;
+          setAllDisabled(false);
         }
-      })
-      .catch(function(){
-        showErr("Erreur réseau. Réessayez.");
+      }
+
+      // Crée les boutons A.. selon le nombre d'options (4 ou 5)
+      poll.options.forEach((label, idx) => {
+        const letter = String.fromCharCode(65 + idx); // A,B,C...
+        const btn = document.createElement("button");
+        btn.className = "opt";
+        btn.textContent = label;
+        btn.disabled = locked;
+        btn.addEventListener("click", () => send(letter));
+        opts.appendChild(btn);
       });
-    }
 
-    for (var c in conf.a) {
-      (function(choice){
-        var b = document.createElement("button");
-        b.textContent = choice;
-        b.onclick = function(){
-          var btns = buttonsEl.querySelectorAll("button");
-          for (var i=0;i<btns.length;i++) btns[i].disabled = true;
-          sendVote(choice);
-        };
-        buttonsEl.appendChild(b);
-      })(c);
-    }
-
-  } catch (e) {
-    var msgEl2 = document.getElementById("msg");
-    if (msgEl2) {
-      msgEl2.className = "no";
-      msgEl2.textContent = "Erreur technique dans la page (JS).";
-    }
-  }
-})();
-</script>
+      if(locked){
+        setAllDisabled(true);
+      }
+    })();
+  </script>
 </body>
 </html>
