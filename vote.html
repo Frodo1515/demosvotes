@@ -2,433 +2,441 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Vote – DÉMOS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vote – Affichage</title>
+
   <style>
     :root{
-      --bg:#0f0f10;
-      --panel:#17171a;
-      --stroke:rgba(255,255,255,.14);
+      --bg:#0b1020;
+      --card:#121a33;
+      --muted:#9aa7c7;
       --text:#ffffff;
-      --muted:rgba(255,255,255,.75);
-      --accent:#4caf50;
+      --accent:#4fd1c5;
       --danger:#ff6b6b;
+      --border:rgba(255,255,255,.12);
     }
-    *{box-sizing:border-box}
+    *{ box-sizing:border-box; }
     body{
       margin:0;
-      background:var(--bg);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(79,209,197,.15), transparent 60%),
+                  radial-gradient(900px 600px at 90% 30%, rgba(154,167,199,.12), transparent 60%),
+                  var(--bg);
       color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
     }
-
     header{
-      position:sticky;
-      top:0;
-      z-index:10;
+      padding:18px 22px;
+      border-bottom:1px solid var(--border);
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      padding:12px 14px;
-      background:var(--panel);
-      border-bottom:1px solid var(--stroke);
+    }
+    .title{
+      font-size:20px;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .meta{
+      color:var(--muted);
+      font-size:14px;
+      display:flex;
+      align-items:center;
+      gap:10px;
       flex-wrap:wrap;
     }
-    .leftHead{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
-    .badge{
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.06);
-      padding:4px 10px;
+    .pill{
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.05);
+      padding:6px 10px;
       border-radius:999px;
-      color:var(--muted);
-      font-size:13px;
     }
-    .btn{
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.06);
-      color:var(--text);
-      padding:8px 10px;
-      border-radius:10px;
-      cursor:pointer;
-      font-weight:800;
-    }
-    .btn:hover{background:rgba(255,255,255,.10)}
-    .btn.accent{border-color:rgba(76,175,80,.55)}
-    .btn.danger{border-color:rgba(255,107,107,.55)}
 
     main{
-      padding:16px;
-      display:flex;
-      gap:16px;
+      padding:22px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 430px 1fr;
+      gap:22px;
       align-items:stretch;
     }
     @media (max-width: 980px){
-      main{flex-direction:column;}
+      .grid{ grid-template-columns: 1fr; }
     }
 
     .card{
-      background:var(--panel);
-      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      border:1px solid var(--border);
       border-radius:18px;
-      padding:16px;
-      min-height:420px;
+      padding:18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      backdrop-filter: blur(6px);
+      min-height: 520px;
     }
 
-    /* Colonne QR */
-    .colQR{width:520px; max-width:520px; flex:0 0 auto;}
-    @media (max-width: 980px){
-      .colQR{width:auto; max-width:none;}
+    .qrWrap{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      height:100%;
     }
-    .qrWrap{display:flex; flex-direction:column; gap:12px;}
-    .qrTitle{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
-    .qrTitle h1{font-size:22px; margin:0; font-weight:950;}
-    .qrSubtitle{color:var(--muted); font-size:14px}
-
     .qrBox{
-      width:100%;
+      flex:1;
       display:flex;
       align-items:center;
       justify-content:center;
       border-radius:16px;
-      background:rgba(255,255,255,.04);
-      border:1px dashed rgba(255,255,255,.20);
-      padding:14px;
-      min-height:320px;
+      background: rgba(0,0,0,.18);
+      border:1px dashed rgba(255,255,255,.18);
+      padding:16px;
     }
-    img#qrImg{
+    .qrBox img{
       max-width:100%;
-      max-height:520px;
+      max-height: 440px;
       object-fit:contain;
-      border-radius:14px;
-      background:#fff;
-      padding:10px;
-      display:block;
+      image-rendering: auto;
     }
-    .qrError{
-      display:none;
-      width:100%;
-      color:rgba(255,255,255,.9);
-      background:rgba(255,107,107,.12);
-      border:1px solid rgba(255,107,107,.35);
-      padding:12px 14px;
+    .qrCaption{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .qrLabel{
+      font-weight:800;
+      font-size:22px;
+      letter-spacing:.6px;
+    }
+    .small{
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .questionTitle{
+      font-size:26px;
+      font-weight:800;
+      line-height:1.2;
+      margin:0 0 14px 0;
+    }
+    .options{
+      display:grid;
+      gap:12px;
+      margin-top:14px;
+    }
+    .opt{
+      padding:14px 14px;
       border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      font-size:18px;
+      line-height:1.25;
+    }
+
+    .timerRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:18px;
+      flex-wrap:wrap;
+    }
+    .timer{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+    }
+    .timer .num{
+      font-size:34px;
+      font-weight:900;
+      color:var(--accent);
+      min-width: 64px;
+      text-align:right;
+    }
+    .timer .unit{
+      color:var(--muted);
+      font-weight:600;
+    }
+
+    .btns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    button{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:14px;
+      font-weight:800;
+      cursor:pointer;
       font-size:14px;
-      line-height:1.35;
     }
-
-    .timerRow{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
-    .timeBig{font-size:44px; font-weight:950; letter-spacing:.5px;}
-    .progress{
-      width:100%;
-      height:12px;
-      border-radius:999px;
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.06);
-      overflow:hidden;
+    button:hover{ background: rgba(255,255,255,.10); }
+    .danger{
+      border-color: rgba(255,107,107,.35);
+      background: rgba(255,107,107,.12);
     }
-    .bar{height:100%; width:0%; background:var(--accent); border-radius:999px; transition:width .2s linear;}
+    .danger:hover{ background: rgba(255,107,107,.18); }
 
-    /* Colonne Question */
-    .colQ{flex:1 1 auto; min-width:320px;}
-    .qWrap{display:flex; flex-direction:column; gap:12px;}
-    .qWrap h2{margin:0; font-size:28px; font-weight:950; line-height:1.15;}
-    .choices{margin:0; padding-left:22px; font-size:20px; line-height:1.5;}
-    .choices li{
-      margin:10px 0;
+    .hint{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .error{
+      color:#ffd1d1;
+      background: rgba(255,107,107,.12);
+      border:1px solid rgba(255,107,107,.35);
       padding:10px 12px;
       border-radius:14px;
-      border:1px solid rgba(255,255,255,.16);
-      background:rgba(255,255,255,.05);
-    }
-    .footNote{
       margin-top:12px;
-      color:var(--muted);
-      font-size:14px;
-      border-top:1px solid var(--stroke);
-      padding-top:12px;
+      display:none;
     }
-
-    /* Overlay fin */
-    .overlay{
-      position:fixed; inset:0; display:none;
-      align-items:center; justify-content:center;
-      background:rgba(0,0,0,.75);
-      z-index:50; padding:20px;
+    .topRight{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
     }
-    .overlay .box{
-      max-width:680px; width:100%;
-      background:var(--panel);
-      border:1px solid var(--stroke);
-      border-radius:20px;
-      padding:22px;
-      text-align:center;
+    .select{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:8px 10px;
+      border-radius:12px;
+      font-weight:700;
     }
-    .overlay .box h3{margin:0 0 8px 0; font-size:28px; font-weight:950;}
-    .overlay .box p{margin:0; color:var(--muted); font-size:16px;}
+    a{ color: var(--accent); text-decoration: none; }
+    a:hover{ text-decoration: underline; }
   </style>
 </head>
 
 <body>
-<header>
-  <div class="leftHead">
-    <div class="badge" id="badgeVote">VOTE</div>
-    <div class="badge" id="badgeUrl">QR → …</div>
-  </div>
-  <div style="display:flex; gap:10px; flex-wrap:wrap;">
-    <button class="btn" id="btnRestart" title="Relancer le timer">↻ Relancer</button>
-    <button class="btn accent" id="btnFullscreen">⛶ Plein écran</button>
-    <button class="btn danger" id="btnShowResults">📊 Résultats</button>
-  </div>
-</header>
+  <header>
+    <div>
+      <div class="title">DÉMOS – Affichage du vote</div>
+      <div class="meta">
+        <span class="pill">QR à gauche · Question à droite · 45 s</span>
+        <span class="pill">URL : <span id="urlEcho"></span></span>
+      </div>
+    </div>
 
-<main>
-  <!-- QR -->
-  <section class="card colQR">
-    <div class="qrWrap">
-      <div class="qrTitle">
-        <div>
-          <h1>Scannez pour voter</h1>
-          <div class="qrSubtitle">Un vote par personne • Durée limitée</div>
+    <div class="topRight">
+      <label class="meta" for="voteSelect">Vote :</label>
+      <select id="voteSelect" class="select">
+        <option value="1">Vote 1</option>
+        <option value="2">Vote 2</option>
+        <option value="3">Vote 3</option>
+        <option value="4">Vote 4</option>
+        <option value="5">Vote 5</option>
+        <option value="6">Vote 6</option>
+        <option value="7">Vote 7</option>
+        <option value="8">Vote 8</option>
+      </select>
+      <button id="applyVoteBtn">Afficher</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <!-- LEFT: QR -->
+      <section class="card">
+        <div class="qrWrap">
+          <div class="qrBox">
+            <img id="qrImg" alt="QR Code du vote" />
+          </div>
+          <div class="qrCaption">
+            <div>
+              <div class="qrLabel" id="qrLabel">VOTE 1</div>
+              <div class="small">Scannez pour voter sur votre téléphone</div>
+            </div>
+            <div class="small">
+              Image : <span id="qrPath"></span>
+            </div>
+          </div>
         </div>
-        <div class="badge">Temps restant</div>
-      </div>
+      </section>
 
-      <div class="qrBox" id="qrBox">
-        <img id="qrImg" alt="QR Code Vote" />
-      </div>
+      <!-- RIGHT: QUESTION -->
+      <section class="card">
+        <h1 class="questionTitle" id="qTitle">Chargement…</h1>
 
-      <div class="qrError" id="qrError"></div>
+        <div class="options" id="qOptions"></div>
 
-      <div class="timerRow">
-        <div class="timeBig" id="timeLeft">30</div>
-        <div class="badge" id="status">Vote ouvert</div>
-      </div>
+        <div class="timerRow">
+          <div class="timer" aria-live="polite">
+            <div class="num" id="timeLeft">45</div>
+            <div class="unit">secondes</div>
+          </div>
 
-      <div class="progress" aria-label="Progression du vote">
-        <div class="bar" id="bar"></div>
-      </div>
+          <div class="btns">
+            <button class="danger" id="stopBtn">STOP</button>
+            <button id="restartBtn">RELANCER (45s)</button>
+            <button id="toResultsBtn">Aller aux résultats</button>
+          </div>
+        </div>
+
+        <div class="hint">
+          Astuce : tu peux aussi changer le vote dans l’URL : <code>?vote=1</code> … <code>?vote=8</code>
+        </div>
+
+        <div class="error" id="errBox"></div>
+      </section>
     </div>
-  </section>
+  </main>
 
-  <!-- Question -->
-  <section class="card colQ">
-    <div class="qWrap">
-      <div class="badge">Question & choix</div>
-      <h2 id="qTitle">Chargement…</h2>
-      <ol class="choices" id="qChoices"></ol>
-      <div class="footNote">Astuce animateur : ajoute <b>&sec=45</b> dans l’URL pour une durée différente.</div>
-    </div>
-  </section>
-</main>
+  <!-- Données des questions -->
+  <script src="./polls.js"></script>
 
-<div class="overlay" id="overlay">
-  <div class="box">
-    <h3>Vote terminé</h3>
-    <p>Affichage des résultats…</p>
-  </div>
-</div>
+  <script>
+    (function(){
+      const DEFAULT_DURATION = 45;
 
-<script>
-  const POLLS = {
-    Vote1: {
-      question: "Aujourd’hui, la place donnée aux habitants dans les décisions locales est plutôt…",
-      choices: [
-        "A – Satisfaisante",
-        "B – Insuffisante",
-        "C – Injuste ou déséquilibrée",
-        "D – Je ne sais pas / je ne me prononce pas"
-      ]
-    },
-    Vote2: {
-      question: "Quand la collectivité consulte les habitants, vous avez le sentiment que l’avis exprimé est…",
-      choices: [
-        "A – Réellement pris en compte",
-        "B – Écouté mais rarement décisif",
-        "C – Surtout symbolique",
-        "D – Je n’ai jamais participé / je ne sais pas"
-      ]
-    },
-    Vote3: {
-      question: "Sur quel type de décisions les habitants devraient-ils avoir le plus de poids ?",
-      choices: [
-        "A – Le cadre de vie et l’environnement",
-        "B – Les services publics et le quotidien",
-        "C – Les grands projets et orientations budgétaires",
-        "D – Je ne sais pas / je n’y ai jamais réfléchi"
-      ]
-    },
-    Vote4: {
-      question: "Pour vous, participer au développement de notre territoire, c’est avant tout…",
-      choices: [
-        "A – De participer à la création des projets de A à Z",
-        "B – Donner votre avis, mais laisser les élus trancher",
-        "C – Être informé et alerté en cas de soucis",
-        "D – Je ne me sens pas concerné"
-      ]
-    },
-    Vote5: {
-      question: "Une plateforme citoyenne sous la forme d’une application ou/et un site internet vous paraît…",
-      choices: [
-        "A – Indispensable aujourd’hui",
-        "B – Utile, mais pas prioritaire",
-        "C – Peu adaptée à notre territoire",
-        "D – Je ne vois pas bien ce que c’est"
-      ]
-    },
-    Vote6: {
-      question: "Ce qui vous donnerait le plus envie d’utiliser une plateforme citoyenne, ce serait…",
-      choices: [
-        "A – Être informé clairement des projets",
-        "B – Pouvoir donner mon avis facilement",
-        "C – Voir des décisions changer concrètement",
-        "D – Les 3 réponses précédentes (ABC)",
-        "E – Rien, je n’utiliserais pas ce type d’outil"
-      ]
-    },
-    Vote7: {
-      question: "Une plateforme citoyenne devrait avant tout garantir…",
-      choices: [
-        "A – La transparence des décisions",
-        "B – L’égalité de parole entre habitants",
-        "C – Le suivi et les résultats concrets des projets",
-        "D – Les 3 réponses précédentes (ABC)",
-        "E – Je ne sais pas ce que j’en attends"
-      ]
-    },
-    Vote8: {
-      question: "Si vos contributions à une plateforme citoyenne avaient un réel poids, vous seriez…",
-      choices: [
-        "A – Prêt à participer régulièrement",
-        "B – Prêt à participer ponctuellement",
-        "C – Peu ou pas intéressé",
-        "D – Je préfère rester en dehors de ces démarches"
-      ]
-    }
-  };
+      const $ = (id) => document.getElementById(id);
 
-  const qs = new URLSearchParams(location.search);
-  const voteKey = qs.get("vote") || "Vote1";
-  const secParam = parseInt(qs.get("sec") || "30", 10);
-  const DURATION = Number.isFinite(secParam) && secParam > 5 ? secParam : 30;
+      const url = new URL(window.location.href);
+      $("urlEcho").textContent = url.pathname + url.search;
 
-  const badgeVote = document.getElementById("badgeVote");
-  const badgeUrl  = document.getElementById("badgeUrl");
-  const qTitle    = document.getElementById("qTitle");
-  const qChoices  = document.getElementById("qChoices");
-  const qrImg     = document.getElementById("qrImg");
-  const qrError   = document.getElementById("qrError");
-  const timeLeft  = document.getElementById("timeLeft");
-  const bar       = document.getElementById("bar");
-  const status    = document.getElementById("status");
-  const overlay   = document.getElementById("overlay");
+      const errBox = $("errBox");
 
-  badgeVote.textContent = voteKey.toUpperCase();
-
-  function voteNumberFromKey(k){
-    const m = String(k).match(/(\d+)/);
-    return m ? parseInt(m[1], 10) : 1;
-  }
-  const voteNum = voteNumberFromKey(voteKey);
-
-  // QR: on tente .png puis .PNG (au cas où)
-  const qrPng = `qrs/VOTE_${voteNum}.png`;
-  const qrPNG = `qrs/VOTE_${voteNum}.PNG`;
-
-  function showQrError(tried){
-    qrError.style.display = "block";
-    qrError.innerHTML =
-      `<b>QR introuvable</b><br>` +
-      `Chemin essayé : <code>${tried}</code><br>` +
-      `👉 Vérifie le nom exact dans le dossier <code>qrs</code> (casse .png/.PNG).`;
-  }
-
-  qrImg.onload = () => { qrError.style.display = "none"; };
-  qrImg.onerror = () => {
-    // si .png échoue, on essaie .PNG
-    if (qrImg.getAttribute("data-tried") !== "PNG") {
-      qrImg.setAttribute("data-tried", "PNG");
-      qrImg.src = qrPNG;
-    } else {
-      showQrError(`${qrPng} puis ${qrPNG}`);
-    }
-  };
-  qrImg.src = qrPng;
-
-  // Lien téléphone
-  const base = location.href.replace(/\/[^\/]*$/, "/");
-  badgeUrl.textContent = `QR → question.html?vote=${voteKey}`;
-
-  // Question / choix
-  const poll = POLLS[voteKey] || null;
-  if (poll) {
-    qTitle.textContent = poll.question;
-    qChoices.innerHTML = "";
-    poll.choices.forEach(txt => {
-      const li = document.createElement("li");
-      li.textContent = txt;
-      qChoices.appendChild(li);
-    });
-  } else {
-    qTitle.textContent = `Question introuvable pour ${voteKey}`;
-    qChoices.innerHTML = "";
-  }
-
-  // Timer
-  let timerId = null;
-
-  function stopTimer(){
-    if (timerId) clearInterval(timerId);
-    timerId = null;
-  }
-
-  function endVote(){
-    status.textContent = "Vote terminé";
-    status.style.borderColor = "rgba(255,107,107,.55)";
-    overlay.style.display = "flex";
-    setTimeout(() => {
-      location.href = `resultats.html?vote=${encodeURIComponent(voteKey)}`;
-    }, 900);
-  }
-
-  function startTimer(){
-    stopTimer();
-    status.textContent = "Vote ouvert";
-    status.style.borderColor = "rgba(76,175,80,.55)";
-    bar.style.width = "0%";
-
-    const startedAt = Date.now();
-
-    const tick = () => {
-      const elapsed = (Date.now() - startedAt) / 1000;
-      const remaining = Math.max(0, Math.ceil(DURATION - elapsed));
-      timeLeft.textContent = String(remaining);
-
-      const pct = Math.min(100, Math.max(0, (elapsed / DURATION) * 100));
-      bar.style.width = pct.toFixed(1) + "%";
-
-      if (remaining <= 0) {
-        stopTimer();
-        endVote();
+      // Lire ?vote=1..8 (ou Vote1/VOTE_1 etc, on tolère)
+      function parseVoteParam() {
+        let v = url.searchParams.get("vote") || "1";
+        v = String(v).trim();
+        // accepte "Vote1" "VOTE_1" "1"
+        const m = v.match(/(\d+)/);
+        const n = m ? parseInt(m[1], 10) : 1;
+        return (n >= 1 && n <= 8) ? n : 1;
       }
-    };
 
-    tick();
-    timerId = setInterval(tick, 150);
-  }
+      function padVoteLabel(n){
+        return `VOTE ${n}`;
+      }
 
-  document.getElementById("btnRestart").addEventListener("click", startTimer);
-  document.getElementById("btnShowResults").addEventListener("click", () => {
-    location.href = `resultats.html?vote=${encodeURIComponent(voteKey)}`;
-  });
-  document.getElementById("btnFullscreen").addEventListener("click", async () => {
-    try{
-      if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
-      else await document.exitFullscreen();
-    }catch(e){}
-  });
+      function qrImagePath(n){
+        // Dossier qrs + nom VOTE_1.png
+        return `./qrs/VOTE_${n}.png`;
+      }
 
-  startTimer();
-</script>
+      function renderVote(n){
+        // Label / Select
+        $("qrLabel").textContent = padVoteLabel(n);
+        $("voteSelect").value = String(n);
+
+        // QR
+        const path = qrImagePath(n);
+        $("qrPath").textContent = path;
+        $("qrImg").src = path;
+
+        // Question
+        const polls = window.POLLS || {};
+        const poll = polls[n];
+
+        if(!poll){
+          showError(`Aucune question trouvée pour le vote ${n}. Vérifie polls.js (window.POLLS[${n}]).`);
+          $("qTitle").textContent = `Vote ${n} : question manquante`;
+          $("qOptions").innerHTML = "";
+          return;
+        }
+
+        hideError();
+        $("qTitle").textContent = poll.title || `Vote ${n}`;
+        $("qOptions").innerHTML = "";
+
+        (poll.options || []).forEach((txt) => {
+          const div = document.createElement("div");
+          div.className = "opt";
+          div.textContent = txt;
+          $("qOptions").appendChild(div);
+        });
+      }
+
+      function showError(msg){
+        errBox.style.display = "block";
+        errBox.textContent = msg;
+      }
+      function hideError(){
+        errBox.style.display = "none";
+        errBox.textContent = "";
+      }
+
+      // Timer
+      let remaining = DEFAULT_DURATION;
+      let intervalId = null;
+
+      function updateTimer(){
+        $("timeLeft").textContent = String(remaining);
+        if(remaining <= 10){
+          $("timeLeft").style.color = "var(--danger)";
+        } else {
+          $("timeLeft").style.color = "var(--accent)";
+        }
+      }
+
+      function startTimer(){
+        stopTimer();
+        intervalId = setInterval(() => {
+          remaining -= 1;
+          updateTimer();
+          if(remaining <= 0){
+            stopTimer();
+            // Optionnel : bascule auto vers résultats
+            // Décommente la ligne suivante si tu veux l'auto-bascule :
+            // goToResults();
+          }
+        }, 1000);
+      }
+
+      function stopTimer(){
+        if(intervalId){
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+      }
+
+      function resetTimer(){
+        remaining = DEFAULT_DURATION;
+        updateTimer();
+      }
+
+      function goToResults(){
+        const currentVote = parseInt($("voteSelect").value, 10) || 1;
+        // adapte ici si ton fichier s'appelle resultat.html ou resultats.html
+        window.location.href = `./resultats.html?vote=${currentVote}`;
+      }
+
+      // UI events
+      $("stopBtn").addEventListener("click", () => {
+        stopTimer();
+      });
+
+      $("restartBtn").addEventListener("click", () => {
+        resetTimer();
+        startTimer();
+      });
+
+      $("toResultsBtn").addEventListener("click", () => {
+        goToResults();
+      });
+
+      $("applyVoteBtn").addEventListener("click", () => {
+        const n = parseInt($("voteSelect").value, 10) || 1;
+        // On recharge la page avec le bon paramètre pour que l'URL reflète le vote
+        window.location.href = `./vote.html?vote=${n}`;
+      });
+
+      // Init
+      const voteN = parseVoteParam();
+      renderVote(voteN);
+      resetTimer();
+      startTimer();
+    })();
+  </script>
 </body>
 </html>
