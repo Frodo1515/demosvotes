@@ -1,158 +1,242 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Résultats en direct</title>
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Résultats – DÉMOS</title>
   <style>
-    body { font-family: system-ui, Arial, sans-serif; background:#111; color:#fff; padding:20px; }
-    h1 { text-align:center; margin-bottom: 0.5rem; }
-    .subtitle { text-align:center; opacity:0.75; margin-bottom: 1.2rem; }
-    .bar-container { max-width: 900px; margin: 0 auto; }
-    .bar-row { display:flex; align-items:center; gap:10px; margin: 0.55rem 0; }
-    .label { width: 48%; }
-    .bar { flex: 1; background:#333; border-radius:6px; overflow:hidden; }
-    .bar-fill { height: 24px; background:#4caf50; width:0; transition: width 0.5s; }
-    .value { width: 18%; text-align:right; font-variant-numeric: tabular-nums; }
-    .total { text-align:center; margin-top: 1rem; font-size: 1.1rem; opacity: 0.85; }
-    .error { text-align:center; margin-top: 1rem; color:#ffb3b3; display:none; }
-    .hint { text-align:center; margin-top: .5rem; opacity:.6; font-size:.9rem; }
+    :root{
+      --bg:#0b1020; --text:#fff; --muted:#9aa7c7; --border:rgba(255,255,255,.12);
+      --card:rgba(255,255,255,.04); --accent:rgba(79,209,197,.75); --danger:rgba(255,107,107,.85);
+    }
+    *{ box-sizing:border-box; }
+    body{ margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--text); }
+    header{ padding:18px 22px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .title{ font-size:20px; font-weight:900; }
+    .meta{ color:var(--muted); font-size:14px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .pill{ border:1px solid var(--border); background:rgba(255,255,255,.05); padding:6px 10px; border-radius:999px; }
+    main{ padding:22px; }
+    .card{ max-width:980px; margin:0 auto; background:var(--card); border:1px solid var(--border); border-radius:18px; padding:18px; }
+    h1{ margin:0 0 14px; font-size:26px; line-height:1.2; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:10px 0 0; }
+    button{
+      border:1px solid var(--border); background:rgba(255,255,255,.06); color:var(--text);
+      padding:10px 14px; border-radius:14px; font-weight:900; cursor:pointer; font-size:14px;
+    }
+    button:hover{ background:rgba(255,255,255,.10); }
+    .grid{ display:grid; gap:12px; margin-top:16px; }
+    .item{ border:1px solid var(--border); background:rgba(255,255,255,.04); border-radius:14px; padding:12px; }
+    .top{ display:flex; justify-content:space-between; gap:12px; align-items:center; font-weight:900; }
+    .count{ color:var(--muted); font-weight:800; }
+    .bar{ margin-top:10px; height:10px; border-radius:999px; background:rgba(255,255,255,.10); overflow:hidden; }
+    .fill{ height:100%; width:0%; background:var(--accent); }
+    .hint{ margin-top:12px; color:var(--muted); font-size:13px; }
+    .error{
+      display:none; margin-top:12px; white-space:pre-wrap;
+      color:#ffd1d1; background:rgba(255,107,107,.12); border:1px solid rgba(255,107,107,.35);
+      padding:10px 12px; border-radius:14px;
+    }
+    code{ color:#cfe8ff; }
   </style>
 </head>
 <body>
-  <h1 id="title">Résultats en direct</h1>
-  <div class="subtitle" id="question"></div>
 
-  <div class="bar-container" id="bars"></div>
+<header>
+  <div>
+    <div class="title">DÉMOS – Résultats</div>
+    <div class="meta">
+      <span class="pill">Vote : <span id="voteLabel">?</span></span>
+      <span class="pill">Auto refresh : <span id="autoLabel">OFF</span></span>
+      <span class="pill">Endpoint testé : <span id="endpointLabel">—</span></span>
+    </div>
+  </div>
+  <div class="row">
+    <button id="refreshBtn">Rafraîchir</button>
+    <button id="toggleAutoBtn">Auto (5s)</button>
+    <button id="backBtn">Retour Vote</button>
+  </div>
+</header>
 
-  <div class="total" id="total">Total des votes : 0</div>
-  <div class="hint" id="hint">Astuce : ajoute ?poll=vote1 … ?poll=vote8 dans l’URL</div>
-  <div class="error" id="error">Erreur de récupération des résultats (script / accès / JSON).</div>
+<main>
+  <div class="card">
+    <h1 id="qTitle">Chargement…</h1>
+    <div id="grid" class="grid"></div>
+    <div id="errBox" class="error"></div>
+    <div id="hint" class="hint"></div>
+  </div>
+</main>
 
-  <script>
-    // ✅ TON URL Apps Script /exec
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfHhgAvrqguR88WYrYNmbMcVeHikMl_c2RFJr-jLfhOhFGsW3nsISAuo7kGKCSYXtp/exec";
+<script src="./polls.js"></script>
+<script>
+(() => {
+  // ✅ TON Apps Script
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfHhgAvrqguR88WYrYNmbMcVeHikMl_c2RFJr-jLfhOhFGsW3nsISAuo7kGKCSYXtp/exec";
 
-    // Questions + réponses
-    const POLLS = {
-      vote1: {
-        title: "Vote 1",
-        question: "Aujourd’hui, la place donnée aux habitants dans les décisions locales est plutôt…",
-        answers: { A:"Satisfaisante", B:"Insuffisante", C:"Injuste ou déséquilibrée", D:"Je ne sais pas / je ne me prononce pas" }
-      },
-      vote2: {
-        title: "Vote 2",
-        question: "Quand la collectivité consulte les habitants, vous avez le sentiment que l’avis exprimé est…",
-        answers: { A:"Réellement pris en compte", B:"Écouté mais rarement décisif", C:"Surtout symbolique", D:"Je n’ai jamais participé / je ne sais pas" }
-      },
-      vote3: {
-        title: "Vote 3",
-        question: "Sur quel type de décisions les habitants devraient-ils avoir le plus de poids ?",
-        answers: { A:"Le cadre de vie et l’environnement", B:"Les services publics et le quotidien", C:"Les grands projets et orientations budgétaires", D:"Je ne sais pas / je n’y ai jamais réfléchi" }
-      },
-      vote4: {
-        title: "Vote 4",
-        question: "Pour vous, participer au développement de notre territoire, c’est avant tout…",
-        answers: { A:"Participer à la création des projets de A à Z", B:"Donner votre avis, mais laisser les élus trancher", C:"Être informé et alerté en cas de soucis", D:"Je ne me sens pas concerné" }
-      },
-      vote5: {
-        title: "Vote 5",
-        question: "Une plateforme citoyenne sous la forme d’une application ou/et un site internet vous paraît…",
-        answers: { A:"Indispensable aujourd’hui", B:"Utile, mais pas prioritaire", C:"Peu adaptée à notre territoire", D:"Je ne vois pas bien ce que c’est" }
-      },
-      vote6: {
-        title: "Vote 6",
-        question: "Ce qui vous donnerait le plus envie d’utiliser une plateforme citoyenne, ce serait…",
-        answers: { A:"Être informé clairement des projets", B:"Pouvoir donner mon avis facilement", C:"Voir des décisions changer concrètement", D:"Les 3 réponses précédentes (ABC)", E:"Rien, je n’utiliserais pas ce type d’outil" }
-      },
-      vote7: {
-        title: "Vote 7",
-        question: "Une plateforme citoyenne devrait avant tout garantir…",
-        answers: { A:"La transparence des décisions", B:"L’égalité de parole entre habitants", C:"Le suivi et les résultats concrets des projets", D:"Les 3 réponses précédentes (ABC)", E:"Je ne sais pas ce que j’en attends" }
-      },
-      vote8: {
-        title: "Vote 8",
-        question: "Si vos contributions à une plateforme citoyenne avaient un réel poids, vous seriez…",
-        answers: { A:"Prêt à participer régulièrement", B:"Prêt à participer ponctuellement", C:"Peu ou pas intéressé", D:"Je préfère rester en dehors de ces démarches" }
-      }
+  const $ = (id) => document.getElementById(id);
+  const grid = $("grid");
+  const errBox = $("errBox");
+
+  function showError(msg){
+    errBox.style.display = "block";
+    errBox.textContent = msg;
+  }
+  function hideError(){
+    errBox.style.display = "none";
+    errBox.textContent = "";
+  }
+
+  function parseVote(){
+    const u = new URL(location.href);
+    const m = String(u.searchParams.get("vote") || "1").match(/(\d+)/);
+    const n = m ? parseInt(m[1], 10) : 1;
+    return (n>=1 && n<=8) ? n : 1;
+  }
+
+  function normalizeCounts(data){
+    // Tolère plein de formats : {A:..} / {counts:{A:..}} / {results:{A:..}} / {data:{A:..}}
+    const obj = data?.counts || data?.results || data?.data || data;
+    const out = {};
+    ["A","B","C","D","E"].forEach(k => {
+      const v = obj?.[k];
+      out[k] = (typeof v === "number") ? v : (parseInt(v || "0", 10) || 0);
+    });
+    return out;
+  }
+
+  function render(poll, counts){
+    $("qTitle").textContent = poll?.title || "Résultats";
+    grid.innerHTML = "";
+
+    const letters = poll.options.map((_, i) => String.fromCharCode(65+i)); // A,B,C,(D,E)
+    const total = letters.reduce((s,k)=> s + (counts[k]||0), 0);
+
+    letters.forEach((k, idx) => {
+      const label = poll.options[idx] || k;
+      const n = counts[k] || 0;
+      const pct = total ? Math.round((n/total)*100) : 0;
+
+      const item = document.createElement("div");
+      item.className = "item";
+      item.innerHTML = `
+        <div class="top">
+          <div>${label}</div>
+          <div class="count">${n} • ${pct}%</div>
+        </div>
+        <div class="bar"><div class="fill" style="width:${pct}%"></div></div>
+      `;
+      grid.appendChild(item);
+    });
+
+    $("hint").textContent = total
+      ? `Total votes : ${total}`
+      : `Aucun vote enregistré (ou l’API ne renvoie pas encore les comptes).`;
+  }
+
+  async function fetchAsJson(url){
+    const res = await fetch(url, { cache: "no-store" });
+    const text = await res.text();
+
+    // 1) JSON direct
+    try { return JSON.parse(text); } catch(e) {}
+
+    // 2) JSONP : callbackName({...})
+    const jsonp = text.match(/^[\w$]+\((.*)\)\s*;?\s*$/s);
+    if (jsonp){
+      try { return JSON.parse(jsonp[1]); } catch(e) {}
+    }
+
+    // sinon -> erreur avec preview
+    throw new Error("Réponse non-JSON. Début:\n" + text.slice(0, 500));
+  }
+
+  function buildCandidates(vote){
+    // On tente plusieurs conventions fréquentes
+    const base = new URL(SCRIPT_URL);
+
+    const make = (params) => {
+      const u = new URL(base.toString());
+      Object.entries(params).forEach(([k,v]) => u.searchParams.set(k, v));
+      return u.toString();
     };
 
-    function getPollId() {
-      const url = new URL(window.location.href);
-      return (url.searchParams.get('poll') || 'vote1').toLowerCase();
+    return [
+      make({ vote: String(vote) }),
+      make({ Vote: `Vote${vote}` }),
+      make({ q: String(vote) }),
+      make({ id: String(vote) }),
+
+      make({ action: "get", vote: String(vote) }),
+      make({ action: "results", vote: String(vote) }),
+      make({ action: "read", vote: String(vote) }),
+
+      make({ mode: "get", vote: String(vote) }),
+      make({ mode: "results", vote: String(vote) }),
+
+      // JSONP (si ton script le gère)
+      make({ action: "get", vote: String(vote), callback: "cb" }),
+      make({ vote: String(vote), callback: "cb" }),
+    ];
+  }
+
+  async function load(){
+    const vote = parseVote();
+    $("voteLabel").textContent = `VOTE ${vote}`;
+
+    const poll = (window.POLLS || {})[vote];
+    if(!poll){
+      showError(`Question manquante dans polls.js : window.POLLS[${vote}]`);
+      return;
     }
 
-    function toApiVoteKey(pollId) {
-      // pollId = "vote1" -> "Vote1"
-      return pollId.replace(/^vote/i, "Vote");
-    }
+    hideError();
+    render(poll, {A:0,B:0,C:0,D:0,E:0});
 
-    function buildBars(pollConfig) {
-      const container = document.getElementById('bars');
-      container.innerHTML = '';
-      Object.entries(pollConfig.answers).forEach(([key, label]) => {
-        const row = document.createElement('div');
-        row.className = 'bar-row';
-        row.innerHTML = `
-          <div class="label"><strong>${key}</strong> – ${label}</div>
-          <div class="bar"><div class="bar-fill" id="bar${key}"></div></div>
-          <div class="value" id="val${key}">0</div>
-        `;
-        container.appendChild(row);
-      });
-    }
+    const candidates = buildCandidates(vote);
 
-    function setHeader(pollId, pollConfig) {
-      document.getElementById('title').textContent = `Résultats en direct – ${pollConfig.title}`;
-      document.getElementById('question').textContent = pollConfig.question;
-      document.title = `Résultats en direct – ${pollConfig.title}`;
-    }
-
-    async function fetchResults(pollId, pollConfig) {
-      const errorEl = document.getElementById('error');
-      try {
-        // Notre API renvoie TOUS les votes (Vote1|A, Vote2|B, etc.)
-        const res = await fetch(`${SCRIPT_URL}?nocache=${Date.now()}`, { cache: 'no-store' });
-        const data = await res.json();
-
-        const apiVote = toApiVoteKey(pollId); // "Vote1"
-        let total = 0;
-        const counts = {};
-
-        for (const key of Object.keys(pollConfig.answers)) {
-          const apiKey = `${apiVote}|${key}`;   // ex "Vote1|A"
-          const n = Number(data[apiKey] || 0);
-          counts[key] = n;
-          total += n;
-        }
-
-        const percent = (v) => total > 0 ? (v / total) * 100 : 0;
-
-        for (const key of Object.keys(pollConfig.answers)) {
-          const p = percent(counts[key]);
-          const bar = document.getElementById(`bar${key}`);
-          const val = document.getElementById(`val${key}`);
-          if (bar) bar.style.width = p + '%';
-          if (val) val.textContent = `${counts[key]} (${p.toFixed(0)}%)`;
-        }
-
-        document.getElementById('total').textContent = `Total des votes : ${total}`;
-        errorEl.style.display = 'none';
-      } catch (e) {
-        console.error(e);
-        errorEl.style.display = 'block';
+    let lastErr = null;
+    for (const url of candidates){
+      try{
+        $("endpointLabel").textContent = url.replace(SCRIPT_URL, "/exec");
+        const data = await fetchAsJson(url);
+        const counts = normalizeCounts(data);
+        render(poll, counts);
+        $("hint").textContent += `  (source OK)`;
+        return;
+      }catch(e){
+        lastErr = e;
       }
     }
 
-    // init
-    const pollId = getPollId();
-    const pollConfig = POLLS[pollId] || POLLS.vote1;
+    showError(
+      "Impossible d’obtenir des résultats en JSON depuis l’Apps Script.\n\n" +
+      "Dernière erreur:\n" + String(lastErr?.message || lastErr) + "\n\n" +
+      "👉 Fais ce test : ouvre ton /exec dans un onglet et dis-moi ce que tu vois.\n" +
+      SCRIPT_URL
+    );
+  }
 
-    setHeader(pollId, pollConfig);
-    buildBars(pollConfig);
+  let timer = null;
+  let auto = false;
 
-    fetchResults(pollId, pollConfig);
-    setInterval(() => fetchResults(pollId, pollConfig), 2000);
-  </script>
+  $("refreshBtn").addEventListener("click", load);
+
+  $("toggleAutoBtn").addEventListener("click", () => {
+    auto = !auto;
+    $("autoLabel").textContent = auto ? "ON" : "OFF";
+    if(timer){ clearInterval(timer); timer = null; }
+    if(auto){
+      load();
+      timer = setInterval(load, 5000);
+    }
+  });
+
+  $("backBtn").addEventListener("click", () => {
+    const vote = parseVote();
+    location.href = `./vote.html?vote=${vote}`;
+  });
+
+  load();
+})();
+</script>
 </body>
 </html>
