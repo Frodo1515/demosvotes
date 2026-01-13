@@ -4,97 +4,130 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vote – DÉMOS</title>
-
 <style>
-body{
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background:#0b1020;
-  color:#fff;
-  margin:0;
-  padding:20px;
-}
-h1{ font-size:22px; margin-bottom:16px; }
-.option{
-  padding:14px;
-  margin-bottom:12px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.2);
-  background:rgba(255,255,255,.05);
-  cursor:pointer;
-}
-.option:hover{ background:rgba(79,209,197,.2); }
-.ok{
-  margin-top:20px;
-  padding:14px;
-  border-radius:12px;
-  background:rgba(79,209,197,.15);
-}
-.err{
-  margin-top:20px;
-  padding:14px;
-  border-radius:12px;
-  background:rgba(255,107,107,.2);
-}
+  :root{ --bg:#0b1020; --muted:#9aa7c7; --border:rgba(255,255,255,.14); --accent:#4fd1c5; }
+  body{ margin:0; padding:18px; background:var(--bg); color:#fff; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+  .card{ max-width:720px; margin:0 auto; border:1px solid var(--border); border-radius:16px; padding:16px; background:rgba(255,255,255,.04); }
+  .meta{ color:var(--muted); font-size:13px; display:flex; gap:10px; flex-wrap:wrap; }
+  h1{ margin:12px 0 14px; font-size:22px; line-height:1.25; }
+  .opt{ width:100%; text-align:left; padding:14px; border-radius:12px; border:1px solid var(--border);
+        background:rgba(255,255,255,.06); color:#fff; font-weight:800; cursor:pointer; }
+  .opt:disabled{ opacity:.55; cursor:not-allowed; }
+  .ok{ margin-top:14px; padding:12px; border-radius:12px; border:1px solid rgba(79,209,197,.35); background:rgba(79,209,197,.12); display:none; }
+  .err{ margin-top:14px; padding:12px; border-radius:12px; border:1px solid rgba(255,107,107,.35); background:rgba(255,107,107,.12); display:none; white-space:pre-wrap; }
+  a{ color:var(--accent); text-decoration:none; } a:hover{ text-decoration:underline; }
 </style>
 </head>
 
 <body>
+  <div class="card">
+    <div class="meta">
+      <span>DÉMOS</span>
+      <span>•</span>
+      <span>Vote <span id="voteLabel">?</span></span>
+    </div>
 
-<h1 id="title">Chargement…</h1>
-<div id="options"></div>
+    <h1 id="title">Chargement…</h1>
+    <div id="options" style="display:grid; gap:12px;"></div>
 
-<div class="ok" id="okBox" style="display:none;"></div>
-<div class="err" id="errBox" style="display:none;"></div>
+    <div class="ok" id="okBox"></div>
+    <div class="err" id="errBox"></div>
+  </div>
 
-<script src="./polls.js"></script>
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfHhgAvrqguR88WYrYNmbMcVeHikMl_c2RFJr-jLfhOhFGsW3nsISAuo7kGKCSYXtp/exec";
+(function(){
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfHhgAvrqguR88WYrYNmbMcVeHikMl_c2RFJr-jLfhOhFGsW3nsISAuo7kGKCSYXtp/exec";
 
-const url = new URL(location.href);
-const vote = parseInt(url.searchParams.get("vote") || "1", 10);
+  const $ = (id) => document.getElementById(id);
+  const url = new URL(location.href);
 
-const polls = window.POLLS || {};
-const poll = polls[vote];
+  const m = String(url.searchParams.get("vote") || "1").match(/(\d+)/);
+  const vote = m ? parseInt(m[1], 10) : 1;
 
-const title = document.getElementById("title");
-const optionsDiv = document.getElementById("options");
-const okBox = document.getElementById("okBox");
-const errBox = document.getElementById("errBox");
+  $("voteLabel").textContent = String(vote);
 
-if(!poll){
-  title.textContent = "Question introuvable";
-}else{
-  title.textContent = poll.title;
-  poll.options.forEach((txt, i) => {
-    const letter = String.fromCharCode(65 + i);
-    const div = document.createElement("div");
-    div.className = "option";
-    div.textContent = txt;
-    div.onclick = () => send(letter);
-    optionsDiv.appendChild(div);
-  });
-}
+  const title = $("title");
+  const options = $("options");
+  const okBox = $("okBox");
+  const errBox = $("errBox");
 
-function send(letter){
-  fetch(SCRIPT_URL, {
-    method:"POST",
-    body: JSON.stringify({ vote, choice: letter })
-  })
-  .then(r => r.json())
-  .then(data => {
-    if(data.status === "ok"){
-      okBox.style.display = "block";
-      okBox.textContent = "Merci ! Votre vote a été pris en compte.";
-    }else{
-      throw new Error(data.message || "Erreur");
-    }
-  })
-  .catch(e => {
+  function showErr(msg){
     errBox.style.display = "block";
-    errBox.textContent = "Erreur lors de l’enregistrement du vote.";
-  });
-}
-</script>
+    errBox.textContent = msg;
+  }
 
+  // ✅ Charge polls.js de façon NON BLOQUANTE
+  function loadPolls(cb){
+    const s = document.createElement("script");
+    s.src = "./polls.js?v=" + Date.now(); // anti-cache
+    s.onload = () => cb(null);
+    s.onerror = () => cb(new Error("Impossible de charger polls.js"));
+    document.head.appendChild(s);
+  }
+
+  function render(){
+    const polls = window.POLLS || {};
+    const poll = polls[vote];
+
+    if(!poll){
+      title.textContent = "Question introuvable";
+      showErr("La question n’a pas été trouvée dans polls.js (window.POLLS[" + vote + "]).");
+      return;
+    }
+
+    title.textContent = poll.title;
+    options.innerHTML = "";
+
+    poll.options.forEach((txt, i) => {
+      const letter = String.fromCharCode(65 + i); // A,B,C...
+      const b = document.createElement("button");
+      b.className = "opt";
+      b.textContent = txt;
+      b.onclick = () => send(letter);
+      options.appendChild(b);
+    });
+  }
+
+  function disableAll(disabled){
+    [...document.querySelectorAll(".opt")].forEach(b => b.disabled = disabled);
+  }
+
+  async function send(choiceLetter){
+    okBox.style.display = "none";
+    errBox.style.display = "none";
+    disableAll(true);
+
+    try{
+      // doPost attend vote/choice en paramètres (et/ou JSON). Ici on le fait simple.
+      const endpoint = `${SCRIPT_URL}?vote=${encodeURIComponent(vote)}&choice=${encodeURIComponent(choiceLetter)}`;
+      const res = await fetch(endpoint, { method: "POST" });
+      const data = await res.json();
+
+      if(data.status === "ok"){
+        okBox.style.display = "block";
+        okBox.textContent = "✅ Merci ! Votre vote a été pris en compte.";
+        return;
+      }
+
+      showErr("Erreur serveur :\n" + JSON.stringify(data, null, 2));
+      disableAll(false);
+    }catch(e){
+      showErr("Erreur réseau : " + e);
+      disableAll(false);
+    }
+  }
+
+  // Démarrage
+  title.textContent = "Chargement de la question…";
+  loadPolls((err) => {
+    if(err){
+      title.textContent = "Erreur";
+      showErr(err.message + "\n\nVérifie que polls.js existe bien à la racine du dépôt (même dossier que question.html).");
+      return;
+    }
+    render();
+  });
+})();
+</script>
 </body>
 </html>
