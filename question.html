@@ -119,7 +119,30 @@
       // ✅ URL Apps Script (POST)
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfHhgAvrqguR88WYrYNmbMcVeHikMl_c2RFJr-jLfhOhFGsW3nsISAuo7kGKCSYXtp/exec";
 const url = new URL(location.href);
-// === RESULTATS EN DIRECT (lecture seule) ===
+
+  const box = document.getElementById("liveResults");
+  box.style.display = "block";
+  fetchResults();
+  if(resultsTimer) clearInterval(resultsTimer);
+  resultsTimer = setInterval(fetchResults, RESULTS_REFRESH_MS);
+}
+
+      const $ = (id) => document.getElementById(id);
+      const url = new URL(location.href);
+
+      function parseVote(){
+        // accepte ?vote=1 ou ?vote=Vote1 etc.
+        const raw = String(url.searchParams.get("vote") || "1");
+        const m = raw.match(/(\d+)/);
+        const n = m ? parseInt(m[1], 10) : 1;
+        return (n>=1 && n<=8) ? n : 1;
+      }
+
+      const vote = parseVote();
+      $("voteLabel").textContent = vote;
+
+      const poll = (window.POLLS || {})[vote];
+    // === RESULTATS EN DIRECT (lecture seule) ===
 const RESULTS_REFRESH_MS = 10000; // 10 secondes
 let resultsTimer = null;
 
@@ -161,28 +184,6 @@ async function fetchResults(){
 }
 
 function startLiveResults(){
-  const box = document.getElementById("liveResults");
-  box.style.display = "block";
-  fetchResults();
-  if(resultsTimer) clearInterval(resultsTimer);
-  resultsTimer = setInterval(fetchResults, RESULTS_REFRESH_MS);
-}
-
-      const $ = (id) => document.getElementById(id);
-      const url = new URL(location.href);
-
-      function parseVote(){
-        // accepte ?vote=1 ou ?vote=Vote1 etc.
-        const raw = String(url.searchParams.get("vote") || "1");
-        const m = raw.match(/(\d+)/);
-        const n = m ? parseInt(m[1], 10) : 1;
-        return (n>=1 && n<=8) ? n : 1;
-      }
-
-      const vote = parseVote();
-      $("voteLabel").textContent = vote;
-
-      const poll = (window.POLLS || {})[vote];
       if(!poll){
         $("qTitle").textContent = "Question introuvable.";
         $("errBox").style.display = "block";
@@ -258,6 +259,7 @@ function startLiveResults(){
   </script>
 </body>
 </html>
+
 
 
 
