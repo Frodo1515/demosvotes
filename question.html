@@ -101,7 +101,15 @@
       // doPost attend vote/choice en paramètres (et/ou JSON). Ici on le fait simple.
       const endpoint = `${SCRIPT_URL}?vote=${encodeURIComponent(vote)}&choice=${encodeURIComponent(choiceLetter)}`;
       const res = await fetch(endpoint, { method: "POST" });
-      const data = await res.json();
+const txt = await res.text();
+
+let data = null;
+try { data = JSON.parse(txt); } catch(e) {}
+
+if(!data){
+  throw new Error("Réponse non-JSON du serveur :\n" + txt.slice(0, 300));
+}
+
 
       if(data.status === "ok"){
         okBox.style.display = "block";
@@ -131,3 +139,4 @@
 </script>
 </body>
 </html>
+
