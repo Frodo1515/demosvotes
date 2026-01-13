@@ -117,14 +117,27 @@ function renderLiveResults(counts, poll){
 }
 
 async function fetchResults(){
-  const res = await fetch(`${SCRIPT_URL}?vote=${encodeURIComponent(vote)}`, { cache: "no-store" });
-  const txt = await res.text();
-  let data = null;
-  try { data = JSON.parse(txt); } catch(e) {}
-  if(data && data.status === "ok" && data.counts){
-    renderLiveResults(data.counts, poll);
+  const box = document.getElementById("liveResults");
+  try{
+    const res = await fetch(`${SCRIPT_URL}?vote=${encodeURIComponent(vote)}`, { cache: "no-store" });
+    const txt = await res.text();
+
+    // Affiche le début de la réponse pour debug (temporaire)
+    box.style.display = "block";
+    box.textContent = "Réponse serveur: " + txt.slice(0, 300);
+
+    let data = null;
+    try { data = JSON.parse(txt); } catch(e) {}
+
+    if(data && data.status === "ok" && data.counts){
+      renderLiveResults(data.counts, poll);
+    }
+  }catch(e){
+    box.style.display = "block";
+    box.textContent = "Erreur fetchResults: " + e;
   }
 }
+
 
 function startLiveResults(){
   const box = document.getElementById("liveResults");
@@ -233,6 +246,7 @@ if(!data){
 </script>
 </body>
 </html>
+
 
 
 
