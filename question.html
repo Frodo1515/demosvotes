@@ -16,6 +16,39 @@
   .ok{ margin-top:14px; padding:12px; border-radius:12px; border:1px solid rgba(79,209,197,.35); background:rgba(79,209,197,.12); display:none; }
   .err{ margin-top:14px; padding:12px; border-radius:12px; border:1px solid rgba(255,107,107,.35); background:rgba(255,107,107,.12); display:none; white-space:pre-wrap; }
   a{ color:var(--accent); text-decoration:none; } a:hover{ text-decoration:underline; }
+  /* === RESULTATS LIVE === */
+#liveResults{
+  margin-top:12px;
+  border:1px solid rgba(79,209,197,.35);
+  background: rgba(79,209,197,.08);
+  padding:12px;
+  border-radius:14px;
+}
+.lr-item{ margin:10px 0; }
+.lr-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  font-weight:800;
+}
+.lr-bar{
+  margin-top:6px;
+  height:10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  overflow:hidden;
+}
+.lr-fill{
+  height:100%;
+  width:0%;
+  background:rgba(79,209,197,.75);
+}
+.lr-small{
+  color:rgba(255,255,255,.75);
+  font-size:12px;
+  margin-top:10px;
+}
+
 </style>
 </head>
 
@@ -140,5 +173,6 @@ if(!data){
 </script>
 </body>
 </html>
+
 
 
