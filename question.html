@@ -84,7 +84,57 @@
   const options = $("options");
   const okBox = $("okBox");
   const errBox = $("errBox");
+// === RESULTATS LIVE (lecture seule) ===
+const RESULTS_REFRESH_MS = 10000; // 10 secondes
+let resultsTimer = null;
 
+function renderLiveResults(counts, poll){
+  const letters = poll.options.map((_, i) => String.fromCharCode(65 + i));
+  const total = letters.reduce((s,k)=>s + (counts[k] || 0), 0);
+
+  let html = `<div style="font-weight:900;margin-bottom:6px;">Résultats en direct</div>`;
+
+  letters.forEach((k, idx) => {
+    const label = poll.options[idx];
+    const n = counts[k] || 0;
+    const pct = total ? Math.round((n / total) * 100) : 0;
+
+    html += `
+      <div class="lr-item">
+        <div class="lr-top">
+          <div>${label}</div>
+          <div>${n} • ${pct}%</div>
+        </div>
+        <div class="lr-bar">
+          <div class="lr-fill" style="width:${pct}%"></div>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `<div class="lr-small">Total votes : ${total}</div>`;
+  document.getElementById("liveResults").innerHTML = html;
+}
+
+async function fetchResults(){
+  const res = await fetch(`${SCRIPT_URL}?vote=${encodeURIComponent(vote)}`, { cache: "no-store" });
+  const txt = await res.text();
+  let data = null;
+  try { data = JSON.parse(txt); } catch(e) {}
+  if(data && data.status === "ok" && data.counts){
+    renderLiveResults(data.counts, poll);
+  }
+}
+
+function startLiveResults(){
+  const box = document.getElementById("liveResults");
+  box.style.display = "block";
+  fetchResults();
+  if(resultsTimer) clearInterval(resultsTimer);
+  resultsTimer = setInterval(fetchResults, RESULTS_REFRESH_MS);
+}
+
+  
   function showErr(msg){
     errBox.style.display = "block";
     errBox.textContent = msg;
@@ -173,6 +223,7 @@ if(!data){
 </script>
 </body>
 </html>
+
 
 
 
