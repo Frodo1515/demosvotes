@@ -164,7 +164,7 @@ function startLiveResults(){
 
   function render(){
     const polls = window.POLLS || {};
-    const poll = polls[vote];
+    window.poll = polls[vote];
 
     if(!poll){
       title.textContent = "Question introuvable";
@@ -246,6 +246,7 @@ if(!data){
 </script>
 </body>
 </html>
+
 
 
 
