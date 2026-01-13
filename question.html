@@ -198,7 +198,14 @@ if(!data){
       if(data.status === "ok"){
         okBox.style.display = "block";
         okBox.textContent = "✅ Merci ! Votre vote a été pris en compte.";
-        startLiveResults();   // ← ICI, avant le return
+        try {
+  startLiveResults();
+} catch (e) {
+  const lr = document.getElementById("liveResults");
+  lr.style.display = "block";
+  lr.textContent = "Erreur résultats live : " + e;
+}
+
         document.getElementById("liveResults").textContent = "Chargement des résultats…";
 
         return;
@@ -226,6 +233,7 @@ if(!data){
 </script>
 </body>
 </html>
+
 
 
 
