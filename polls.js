@@ -7,8 +7,8 @@ window.POLLS = {
     options: [
       "A – Satisfaisante",
       "B – Insuffisante",
-      "C – Injuste ou déséquilibrée",
-      "D – Je ne sais pas / je ne me prononce pas"
+      "C – Déséquilibrée",
+      "D – Je ne sais pas"
     ]
   },
 
@@ -18,27 +18,27 @@ window.POLLS = {
       "A – Réellement pris en compte",
       "B – Écouté mais rarement décisif",
       "C – Surtout symbolique",
-      "D – Je n’ai jamais participé / je ne sais pas"
+      "D – Je ne sais pas"
     ]
   },
 
   3: {
-    title: "Q3 Sur quel type de décisions les habitants devraient-ils avoir le plus de poids ?",
+    title: "Q3 A quel moment les habitants devraient-ils être impliqué ?",
     options: [
-      "A – Le cadre de vie et l’environnement",
-      "B – Les services publics et le quotidien",
-      "C – Les grands projets et orientations budgétaires",
-      "D – Je ne sais pas / je n’y ai jamais réfléchi"
+      "A – Au moment de l’élection",
+      "B – Au moment de l’élaboration d’un projet qui me concerne directement",
+      "C – Pendant toute la durée du mandat",
+      "D – Les 3 réponses précédentes (ABC)"
     ]
   },
 
   4: {
-    title: "Q4 Pour vous, participer au développement de notre territoire, c’est avant tout…",
+    title: "Q4 Participer au développement de notre territoire, c’est avant tout…",
     options: [
-      "A – De participer à la création des projets de A à Z",
+      "A – Se tenir informé" ,
       "B – Donner votre avis, mais laisser les élus trancher",
-      "C – Être informé et alerté en cas de soucis",
-      "D – Je ne me sens pas concerné"
+      "C – Participer à l’élaboration des projets",
+      "D – Je n’ai pas d’opinion"
     ]
   },
 
@@ -55,9 +55,9 @@ window.POLLS = {
   6: {
     title: "Q6 Ce qui vous donnerait le plus envie d’utiliser une plateforme citoyenne, ce serait…",
     options: [
-      "A – Être informé clairement des projets",
+      "A – Être informé des projets et avoir des éclairages complémentaires",
       "B – Pouvoir donner mon avis facilement",
-      "C – Voir des décisions changer concrètement",
+      "C – Voir des décisions évoluer",
       "D – Les 3 réponses précédentes (ABC)",
       "E – Rien, je n’utiliserais pas ce type d’outil"
     ]
@@ -67,8 +67,8 @@ window.POLLS = {
     title: "Q7 Une plateforme citoyenne devrait avant tout garantir…",
     options: [
       "A – La transparence des décisions",
-      "B – L’égalité de parole entre habitants",
-      "C – Le suivi et les résultats concrets des projets",
+      "B – Que tous les avis puissent s’exprimer",
+      "C – Le suivi des demandes citoyennes",
       "D – Les 3 réponses précédentes (ABC)",
       "E – Je ne sais pas ce que j’en attends"
     ]
