@@ -214,6 +214,11 @@
     }
     a{ color: var(--accent); text-decoration: none; }
     a:hover{ text-decoration: underline; }
+    /* === MASQUAGE DES ANNOTATIONS === */
+header .meta { display: none !important; }     /* "QR à gauche..." + "URL: ..." */
+.hint { display: none !important; }            /* "Astuce : ..." */
+.qrCaption .small:last-child { display: none !important; } /* "Image : ./qrs/..." */
+
   </style>
 </head>
 
@@ -440,4 +445,5 @@
   </script>
 </body>
 </html>
+
 
