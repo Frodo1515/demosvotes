@@ -176,6 +176,7 @@
             $("lockInfo").textContent = "Vote enregistré. Merci !";
             $("okBox").style.display = "block";
             $("okBox").textContent = `✅ Merci ! Votre vote (${choiceLetter}) a été pris en compte.`;
+            startLiveResults();   // ← AJOUTER CETTE LIGNE
             return;
           }
 
@@ -208,5 +209,6 @@
   </script>
 </body>
 </html>
+
 
 
