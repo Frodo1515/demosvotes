@@ -1,266 +1,100 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Vote</title>
-  <style>
-    :root{ --bg:#0b1020; --card:#121a33; --muted:#9aa7c7; --text:#fff; --border:rgba(255,255,255,.12); --accent:#4fd1c5; }
-    *{ box-sizing:border-box; }
-    body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background: radial-gradient(900px 600px at 20% 10%, rgba(79,209,197,.18), transparent 60%),
-                  radial-gradient(900px 600px at 90% 20%, rgba(154,167,199,.12), transparent 60%),
-                  var(--bg);
-      color:var(--text);
-      padding:18px;
-    }
-    .card{
-      max-width:720px; margin:0 auto;
-      background: rgba(255,255,255,.04);
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:18px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      backdrop-filter: blur(6px);
-    }
-    .meta{ color:var(--muted); font-size:13px; display:flex; gap:10px; flex-wrap:wrap; }
-    .pill{ border:1px solid var(--border); background:rgba(255,255,255,.05); padding:6px 10px; border-radius:999px; }
-    h1{ margin:12px 0 0; font-size:22px; line-height:1.25; }
-    .opts{ display:grid; gap:12px; margin-top:16px; }
-    button.opt{
-      width:100%;
-      text-align:left;
-      padding:14px 14px;
-      border-radius:14px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.06);
-      color:var(--text);
-      font-size:16px;
-      font-weight:800;
-      cursor:pointer;
-    }
-    button.opt:disabled{ opacity:.6; cursor:not-allowed; }
-    .ok{
-      margin-top:14px;
-      border:1px solid rgba(79,209,197,.35);
-      background: rgba(79,209,197,.12);
-      padding:12px;
-      border-radius:14px;
-      display:none;
-      white-space:pre-wrap;
-    }
-    .err{
-      margin-top:14px;
-      border:1px solid rgba(255,107,107,.35);
-      background: rgba(255,107,107,.12);
-      padding:12px;
-      border-radius:14px;
-      display:none;
-      white-space:pre-wrap;
-    }
-    .small{ margin-top:10px; color:var(--muted); font-size:12px; }
-    a{ color: var(--accent); text-decoration:none; }
-    a:hover{ text-decoration:underline; }
-    /* === RESULTATS EN DIRECT (TELEPHONE) === */
-#liveResults{
-  margin-top:12px;
-  border:1px solid rgba(79,209,197,.35);
-  background: rgba(79,209,197,.08);
-  padding:12px;
-  border-radius:14px;
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vote – DÉMOS</title>
+
+<style>
+body{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background:#0b1020;
+  color:#fff;
+  margin:0;
+  padding:20px;
 }
-.lr-item{ margin:10px 0; }
-.lr-top{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  font-weight:800;
+h1{ font-size:22px; margin-bottom:16px; }
+.option{
+  padding:14px;
+  margin-bottom:12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.05);
+  cursor:pointer;
 }
-.lr-bar{
-  margin-top:6px;
-  height:10px;
-  border-radius:999px;
-  background:rgba(255,255,255,.12);
-  overflow:hidden;
+.option:hover{ background:rgba(79,209,197,.2); }
+.ok{
+  margin-top:20px;
+  padding:14px;
+  border-radius:12px;
+  background:rgba(79,209,197,.15);
 }
-.lr-fill{
-  height:100%;
-  width:0%;
-  background:rgba(79,209,197,.75);
+.err{
+  margin-top:20px;
+  padding:14px;
+  border-radius:12px;
+  background:rgba(255,107,107,.2);
 }
-.lr-small{
-  color:rgba(255,255,255,.75);
-  font-size:12px;
-  margin-top:10px;
-}
-  </style>
+</style>
 </head>
+
 <body>
-  <div class="card">
-    <div class="meta">
-      <span class="pill">DÉMOS</span>
-      <span class="pill">Vote <span id="voteLabel">?</span></span>
-    </div>
 
-    <h1 id="qTitle">Chargement…</h1>
-    <div class="opts" id="opts"></div>
+<h1 id="title">Chargement…</h1>
+<div id="options"></div>
 
-    <div class="ok" id="okBox"></div>
-    <div class="ok" id="liveResults" style="display:none;"></div>
-    <div class="err" id="errBox"></div>
+<div class="ok" id="okBox" style="display:none;"></div>
+<div class="err" id="errBox" style="display:none;"></div>
 
-    <div class="small" id="lockInfo"></div>
-  </div>
+<script src="./polls.js"></script>
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfHhgAvrqguR88WYrYNmbMcVeHikMl_c2RFJr-jLfhOhFGsW3nsISAuo7kGKCSYXtp/exec";
 
-  <script src="./polls.js"></script>
-  <script>
-    (function(){
-      // ✅ URL Apps Script (POST)
-      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfHhgAvrqguR88WYrYNmbMcVeHikMl_c2RFJr-jLfhOhFGsW3nsISAuo7kGKCSYXtp/exec";
 const url = new URL(location.href);
+const vote = parseInt(url.searchParams.get("vote") || "1", 10);
 
-  const box = document.getElementById("liveResults");
-  box.style.display = "block";
-  fetchResults();
-  if(resultsTimer) clearInterval(resultsTimer);
-  resultsTimer = setInterval(fetchResults, RESULTS_REFRESH_MS);
-}
+const polls = window.POLLS || {};
+const poll = polls[vote];
 
-      const $ = (id) => document.getElementById(id);
-      const url = new URL(location.href);
+const title = document.getElementById("title");
+const optionsDiv = document.getElementById("options");
+const okBox = document.getElementById("okBox");
+const errBox = document.getElementById("errBox");
 
-      function parseVote(){
-        // accepte ?vote=1 ou ?vote=Vote1 etc.
-        const raw = String(url.searchParams.get("vote") || "1");
-        const m = raw.match(/(\d+)/);
-        const n = m ? parseInt(m[1], 10) : 1;
-        return (n>=1 && n<=8) ? n : 1;
-      }
-
-      const vote = parseVote();
-      $("voteLabel").textContent = vote;
-
-      const poll = (window.POLLS || {})[vote];
-    // === RESULTATS EN DIRECT (lecture seule) ===
-const RESULTS_REFRESH_MS = 10000; // 10 secondes
-let resultsTimer = null;
-
-function renderLiveResults(counts, poll){
-  const letters = poll.options.map((_, i) => String.fromCharCode(65 + i)); // A..D/E
-  const total = letters.reduce((s,k)=>s + (counts[k] || 0), 0);
-
-  let html = `<div style="font-weight:900;margin-bottom:6px;">Résultats en direct</div>`;
-
-  letters.forEach((k, idx) => {
-    const label = poll.options[idx];
-    const n = counts[k] || 0;
-    const pct = total ? Math.round((n / total) * 100) : 0;
-
-    html += `
-      <div class="lr-item">
-        <div class="lr-top">
-          <div>${label}</div>
-          <div>${n} • ${pct}%</div>
-        </div>
-        <div class="lr-bar">
-          <div class="lr-fill" style="width:${pct}%"></div>
-        </div>
-      </div>
-    `;
+if(!poll){
+  title.textContent = "Question introuvable";
+}else{
+  title.textContent = poll.title;
+  poll.options.forEach((txt, i) => {
+    const letter = String.fromCharCode(65 + i);
+    const div = document.createElement("div");
+    div.className = "option";
+    div.textContent = txt;
+    div.onclick = () => send(letter);
+    optionsDiv.appendChild(div);
   });
-
-  html += `<div class="lr-small">Total votes : ${total}</div>`;
-  document.getElementById("liveResults").innerHTML = html;
 }
 
-async function fetchResults(){
-  const urlRes = `${SCRIPT_URL}?vote=${encodeURIComponent(vote)}`;
-  const res = await fetch(urlRes, { cache: "no-store" });
-  const data = await res.json();
-  if(data.status === "ok" && data.counts){
-    renderLiveResults(data.counts, poll);
-  }
+function send(letter){
+  fetch(SCRIPT_URL, {
+    method:"POST",
+    body: JSON.stringify({ vote, choice: letter })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(data.status === "ok"){
+      okBox.style.display = "block";
+      okBox.textContent = "Merci ! Votre vote a été pris en compte.";
+    }else{
+      throw new Error(data.message || "Erreur");
+    }
+  })
+  .catch(e => {
+    errBox.style.display = "block";
+    errBox.textContent = "Erreur lors de l’enregistrement du vote.";
+  });
 }
+</script>
 
-function startLiveResults(){
-      if(!poll){
-        $("qTitle").textContent = "Question introuvable.";
-        $("errBox").style.display = "block";
-        $("errBox").textContent = `Aucune question pour vote=${vote} dans polls.js`;
-        return;
-      }
-
-      $("qTitle").textContent = poll.title;
-      const opts = $("opts");
-      opts.innerHTML = "";
-
-      // Anti double-vote simple (localStorage) : 1 vote max par téléphone par question
-      const lockKey = `DEMOS_VOTE_LOCK_${vote}`;
-      const locked = localStorage.getItem(lockKey) === "1";
-      if(locked){
-        $("lockInfo").textContent = "Vous avez déjà voté pour cette question sur ce téléphone.";
-      }
-
-      function setAllDisabled(disabled){
-        [...document.querySelectorAll("button.opt")].forEach(b => b.disabled = disabled);
-      }
-
-      async function send(choiceLetter){
-        $("okBox").style.display = "none";
-        $("errBox").style.display = "none";
-
-        setAllDisabled(true);
-
-        try{
-          const endpoint = `${SCRIPT_URL}?vote=${encodeURIComponent(vote)}&choice=${encodeURIComponent(choiceLetter)}`;
-          const res = await fetch(endpoint, { method: "POST" });
-          const txt = await res.text();
-
-          // Essaye JSON, sinon affiche texte brut
-          let data = null;
-          try { data = JSON.parse(txt); } catch(e){}
-
-          if(data && data.status === "ok"){
-            localStorage.setItem(lockKey, "1");
-            $("lockInfo").textContent = "Vote enregistré. Merci !";
-            $("okBox").style.display = "block";
-            $("okBox").textContent = `✅ Merci ! Votre vote (${choiceLetter}) a été pris en compte.`;
-            startLiveResults();   // ← AJOUTER CETTE LIGNE
-            return;
-          }
-
-          $("errBox").style.display = "block";
-          $("errBox").textContent = "Erreur renvoyée par le serveur:\n" + (data ? JSON.stringify(data, null, 2) : txt);
-
-          setAllDisabled(false);
-        }catch(err){
-          $("errBox").style.display = "block";
-          $("errBox").textContent = "Erreur réseau:\n" + err;
-          setAllDisabled(false);
-        }
-      }
-
-      // Crée les boutons A.. selon le nombre d'options (4 ou 5)
-      poll.options.forEach((label, idx) => {
-        const letter = String.fromCharCode(65 + idx); // A,B,C...
-        const btn = document.createElement("button");
-        btn.className = "opt";
-        btn.textContent = label;
-        btn.disabled = locked;
-        btn.addEventListener("click", () => send(letter));
-        opts.appendChild(btn);
-      });
-
-      if(locked){
-        setAllDisabled(true);
-      }
-    })();
-  </script>
 </body>
 </html>
-
-
-
-
-
