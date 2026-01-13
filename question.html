@@ -198,6 +198,7 @@ if(!data){
       if(data.status === "ok"){
         okBox.style.display = "block";
         okBox.textContent = "✅ Merci ! Votre vote a été pris en compte.";
+        startLiveResults();   // ← ICI, avant le return
         return;
       }
 
@@ -223,6 +224,7 @@ if(!data){
 </script>
 </body>
 </html>
+
 
 
 
