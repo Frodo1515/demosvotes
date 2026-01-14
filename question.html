@@ -211,22 +211,26 @@ if(!data){
 }
 
 
-      if(data.status === "ok"){
-        okBox.style.display = "block";
-        okBox.textContent = "✅ Merci ! Votre vote a été pris en compte.";
-        try {
-  startLiveResults();
-} catch (e) {
-  const lr = document.getElementById("liveResults");
-  lr.style.display = "block";
-  lr.textContent = "Erreur résultats live : " + e;
+     if(data.status === "ok"){
+  okBox.style.display = "block";
+  okBox.textContent = "✅ Merci ! Votre vote a été pris en compte.";
+
+  // 🔒 Verrouillage immédiat
+  localStorage.setItem(lockKey, "1");
+  disableAll(true);
+
+  // 📊 Résultats live (optionnels)
+  try {
+    startLiveResults();
+  } catch (e) {
+    const lr = document.getElementById("liveResults");
+    lr.style.display = "block";
+    lr.textContent = "Erreur résultats live : " + e;
+  }
+
+  return;
 }
 
-       
-localStorage.setItem(lockKey, "1");
-disableAll(true);
-        return;
-      }
 
       showErr("Erreur serveur :\n" + JSON.stringify(data, null, 2));
       disableAll(false);
@@ -250,6 +254,7 @@ disableAll(true);
 </script>
 </body>
 </html>
+
 
 
 
