@@ -77,11 +77,14 @@
 
   const m = String(url.searchParams.get("vote") || "1").match(/(\d+)/);
   const vote = m ? parseInt(m[1], 10) : 1;
-  const lockKey = "DEMOS_VOTE_LOCK_" + vote;
-const alreadyVoted = localStorage.getItem(lockKey) === "1";
-  // 🔧 Mode admin test : si ?reset=1, on déverrouille cette question
+ const lockKey = "DEMOS_VOTE_LOCK_" + vote;
+
+// 🔧 Mode admin test : si ?reset=1, on déverrouille cette question
 if(url.searchParams.get("reset") === "1"){
   localStorage.removeItem(lockKey);
+}
+
+const alreadyVoted = localStorage.getItem(lockKey) === "1";
 }
 
   $("voteLabel").textContent = String(vote);
@@ -263,6 +266,7 @@ if(!data){
 </script>
 </body>
 </html>
+
 
 
 
