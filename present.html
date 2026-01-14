@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Présentation – DÉMOS</title>
+  <style>
+    html, body { height: 100%; margin: 0; background:#000; color:#fff; font-family: Arial, sans-serif; }
+    .slide { display:none; height:100vh; width:100vw; align-items:center; justify-content:center; position:relative; }
+    .slide.active { display:flex; }
+    img { max-width:100vw; max-height:100vh; object-fit:contain; }
+    video { max-width:100vw; max-height:100vh; object-fit:contain; background:#000; }
+    iframe { width:100vw; height:100vh; border:0; background:#000; }
+
+    /* HUD discret */
+    .hud{
+      position:fixed; left:12px; bottom:10px; z-index:9999;
+      background:rgba(0,0,0,.45); padding:8px 10px; border-radius:10px;
+      font-size:14px; display:flex; gap:10px; align-items:center;
+    }
+    .hud button{
+      background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.25);
+      padding:8px 10px; border-radius:10px; cursor:pointer;
+    }
+    .hud .hint{ opacity:.85; }
+    .bigbtn{
+      position:absolute; bottom:24px; right:24px; z-index:10;
+      background:rgba(255,255,255,.12); color:#fff; border:1px solid rgba(255,255,255,.25);
+      padding:14px 16px; border-radius:14px; font-size:18px; cursor:pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ✅ REMPLACE ICI tes chemins (images/videos) + garde tes liens de vote -->
+
+  <!-- 1) IMAGE -->
+  <section class="slide" data-type="image">
+    <img src="media/image1.jpg" alt="Image 1">
+  </section>
+
+  <!-- 2) VIDEO -->
+  <section class="slide" data-type="video">
+    <video src="media/video1.mp4" playsinline muted preload="auto"></video>
+    <button class="bigbtn" data-action="play">▶ Lancer la vidéo</button>
+  </section>
+
+  <!-- 3) IMAGE -->
+  <section class="slide" data-type="image">
+    <img src="media/image2.jpg" alt="Image 2">
+  </section>
+
+  <!-- 4) VOTE 1 -->
+  <section class="slide" data-type="iframe">
+    <iframe src="https://frodo1515.github.io/demosvotes/vote.html?vote=1"></iframe>
+  </section>
+
+  <!-- 5) VOTE 2 -->
+  <section class="slide" data-type="iframe">
+    <iframe src="https://frodo1515.github.io/demosvotes/vote.html?vote=2"></iframe>
+  </section>
+
+  <!-- 6) VOTE 3 -->
+  <section class="slide" data-type="iframe">
+    <iframe src="https://frodo1515.github.io/demosvotes/vote.html?vote=3"></iframe>
+  </section>
+
+  <!-- 7) VOTE 4 -->
+  <section class="slide" data-type="iframe">
+    <iframe src="https://frodo1515.github.io/demosvotes/vote.html?vote=4"></iframe>
+  </section>
+
+  <!-- 8) IMAGE -->
+  <section class="slide" data-type="image">
+    <img src="media/image3.jpg" alt="Image 3">
+  </section>
+
+  <!-- 9) VIDEO 2 -->
+  <section class="slide" data-type="video">
+    <video src="media/video2.mp4" playsinline muted preload="auto"></video>
+    <button class="bigbtn" data-action="play">▶ Lancer la vidéo</button>
+  </section>
+
+  <!-- 10) IMAGE -->
+  <section class="slide" data-type="image">
+    <img src="media/image4.jpg" alt="Image 4">
+  </section>
+
+  <!-- 11) VOTE 5 -->
+  <section class="slide" data-type="iframe">
+    <iframe src="https://frodo1515.github.io/demosvotes/vote.html?vote=5"></iframe>
+  </section>
+
+  <!-- 12) VOTE 6 -->
+  <section class="slide" data-type="iframe">
+    <iframe src="https://frodo1515.github.io/demosvotes/vote.html?vote=6"></iframe>
+  </section>
+
+  <!-- 13) VOTE 7 -->
+  <section class="slide" data-type="iframe">
+    <iframe src="https://frodo1515.github.io/demosvotes/vote.html?vote=7"></iframe>
+  </section>
+
+  <!-- 14) VOTE 8 -->
+  <section class="slide" data-type="iframe">
+    <iframe src="https://frodo1515.github.io/demosvotes/vote.html?vote=8"></iframe>
+  </section>
+
+  <!-- 15) IMAGE -->
+  <section class="slide" data-type="image">
+    <img src="media/image5.jpg" alt="Image 5">
+  </section>
+
+  <!-- 16) VIDEO 3 -->
+  <section class="slide" data-type="video">
+    <video src="media/video3.mp4" playsinline muted preload="auto"></video>
+    <button class="bigbtn" data-action="play">▶ Lancer la vidéo</button>
+  </section>
+
+  <!-- 17) IMAGE -->
+  <section class="slide" data-type="image">
+    <img src="media/image6.jpg" alt="Image 6">
+  </section>
+
+
+  <div class="hud">
+    <button id="prev">◀</button>
+    <button id="next">▶</button>
+    <button id="fs">⛶</button>
+    <span class="hint">Télécommande: → / ← / PageDown / PageUp / Espace</span>
+    <span id="counter"></span>
+  </div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  let i = 0;
+
+  function stopAllVideos(){
+    document.querySelectorAll('video').forEach(v => { try{ v.pause(); v.currentTime = 0; }catch(e){} });
+  }
+
+  async function tryAutoPlayCurrent(){
+    const s = slides[i];
+    if(!s) return;
+
+    // Auto-play uniquement pour les slides vidéo, en muet (plus permissif)
+    if(s.dataset.type === 'video'){
+      const v = s.querySelector('video');
+      if(v){
+        v.muted = true;
+        try { await v.play(); } catch(e) {
+          // si bloqué, on laisse le bouton "Lancer"
+        }
+      }
+    }
+  }
+
+  function activate(idx){
+    if(idx < 0) idx = 0;
+    if(idx >= slides.length) idx = slides.length - 1;
+
+    stopAllVideos();
+    slides.forEach(s => s.classList.remove('active'));
+    i = idx;
+    slides[i].classList.add('active');
+
+    document.getElementById('counter').textContent = `Écran ${i+1}/${slides.length}`;
+    tryAutoPlayCurrent();
+  }
+
+  function next(){ activate(i+1); }
+  function prev(){ activate(i-1); }
+
+  // Boutons HUD
+  document.getElementById('next').addEventListener('click', next);
+  document.getElementById('prev').addEventListener('click', prev);
+
+  // Plein écran
+  document.getElementById('fs').addEventListener('click', () => {
+    const el = document.documentElement;
+    if (!document.fullscreenElement) el.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  });
+
+  // Bouton "Lancer la vidéo"
+  document.body.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action="play"]');
+    if(!btn) return;
+    const s = slides[i];
+    const v = s.querySelector('video');
+    if(v){ v.muted = false; v.play().catch(()=>{}); }
+  });
+
+  // Télécommande/clavier
+  window.addEventListener('keydown', (e) => {
+    const k = e.key;
+    if(k === 'ArrowRight' || k === 'PageDown' || k === ' ' || k === 'Enter'){ e.preventDefault(); next(); }
+    if(k === 'ArrowLeft'  || k === 'PageUp'){ e.preventDefault(); prev(); }
+    if(k === 'Escape'){ /* laisse le navigateur gérer */ }
+  });
+
+  // Init
+  activate(0);
+</script>
+</body>
+</html>
