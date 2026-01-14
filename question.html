@@ -78,7 +78,8 @@
   const m = String(url.searchParams.get("vote") || "1").match(/(\d+)/);
   const vote = m ? parseInt(m[1], 10) : 1;
   const lockKey = "DEMOS_VOTE_LOCK_" + vote;
-
+const alreadyVoted = localStorage.getItem(lockKey) === "1";
+  
   $("voteLabel").textContent = String(vote);
 
   const title = $("title");
@@ -247,6 +248,7 @@ if(!data){
 </script>
 </body>
 </html>
+
 
 
 
