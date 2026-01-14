@@ -175,7 +175,8 @@ function startLiveResults(){
     const polls = window.POLLS || {};
     window.poll = polls[vote];
 
-    if(!poll){
+if(!window.poll){
+
       title.textContent = "Question introuvable";
       showErr("La question n’a pas été trouvée dans polls.js (window.POLLS[" + vote + "]).");
       return;
@@ -266,6 +267,7 @@ if(!data){
 </script>
 </body>
 </html>
+
 
 
 
