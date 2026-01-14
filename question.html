@@ -183,6 +183,7 @@ function startLiveResults(){
       b.className = "opt";
       b.textContent = txt;
       b.onclick = () => send(letter);
+      if(alreadyVoted) b.disabled = true;
       options.appendChild(b);
     });
   }
@@ -248,6 +249,7 @@ if(!data){
 </script>
 </body>
 </html>
+
 
 
 
