@@ -173,6 +173,11 @@ function startLiveResults(){
       showErr("La question n’a pas été trouvée dans polls.js (window.POLLS[" + vote + "]).");
       return;
     }
+// 🔒 Message si déjà voté
+if(alreadyVoted){
+  okBox.style.display = "block";
+  okBox.textContent = "🔒 Vous avez déjà voté pour cette question.";
+}
 
     title.textContent = poll.title;
     options.innerHTML = "";
@@ -254,6 +259,7 @@ if(!data){
 </script>
 </body>
 </html>
+
 
 
 
