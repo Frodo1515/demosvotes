@@ -148,16 +148,16 @@ let lastNav = 0;
   }
 
   function loadVoteIframeFresh(slideEl) {
-    const fr = slideEl?.querySelector("iframe");
-    if (!fr) return;
+  const fr = slideEl?.querySelector("iframe");
+  if (!fr) return;
 
-    const n = fr.getAttribute("data-vote");
-    if (!n) return;
+  const n = fr.getAttribute("data-vote");
+  if (!n) return;
 
-    // IMPORTANT: on force vote.html directement + cache-buster
-    // => le chrono repart à zéro à chaque vote
-    fr.src = `vote.html?vote=${encodeURIComponent(n)}&_ts=${Date.now()}`;
-  }
+  // 👉 vote EN LIGNE (backend commun pour tous les téléphones)
+  fr.src = `https://frodo1515.github.io/demosvotes/vote.html?vote=${encodeURIComponent(n)}&_ts=${Date.now()}`;
+}
+
 
   async function onEnterSlide() {
     hardFocus();
