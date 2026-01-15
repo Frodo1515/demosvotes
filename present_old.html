@@ -48,7 +48,7 @@
 
   <!-- 11 -->
   <section class="slide">
-    <iframe class="yt" data-src="https://www.youtube-nocookie.com/embed/A6bYRsi_PdM?autoplay=1&mute=1&controls=0&rel=0&playsinline=1&fs=1&modestbranding=1" src="" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+    <video src="media/vid_02_centrale.mp4" playsinline preload="auto" muted></video>
   </section>
 
   <!-- 12 -->
@@ -164,16 +164,9 @@ let lastNav = 0;
     const cur = slides[i];
 
     // Vote : recharge toujours vote.html => reset chrono
-    const frVote = cur?.querySelector('iframe[data-vote]');
-    if (frVote) {
+    const fr = cur?.querySelector("iframe");
+    if (fr) {
       loadVoteIframeFresh(cur);
-      return;
-    }
-
-    // YouTube (ou autre iframe média) : charge seulement quand la slide s'affiche
-    const frYT = cur?.querySelector('iframe.yt[data-src]');
-    if (frYT) {
-      try { frYT.src = frYT.getAttribute('data-src'); } catch(e) {}
       return;
     }
 
