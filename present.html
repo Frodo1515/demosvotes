@@ -21,13 +21,10 @@
 
   <!-- 2 -->
   <section class="slide">
-  <iframe class="yt"
-    data-src="https://www.youtube-nocookie.com/embed/ID_INTRO?autoplay=1&mute=1&controls=0&rel=0&playsinline=1&fs=1&modestbranding=1"
-    src=""
-    allow="autoplay; fullscreen; picture-in-picture"
-    allowfullscreen></iframe>
-</section>
-
+    <video playsinline preload="auto" muted>
+      <source src="media/vid_01_debut_web.mp4" type="video/mp4">
+    </video>
+  </section>
 
   <!-- 3 -->
   <section class="slide"><img src="media/img_02_preparation_vote_1.png" alt=""></section>
@@ -51,7 +48,7 @@
 
   <!-- 11 -->
   <section class="slide">
-    <iframe class="yt" data-src="https://www.youtube-nocookie.com/embed/A6bYRsi_PdM?autoplay=1&mute=1&controls=0&rel=0&playsinline=1&fs=1&modestbranding=1" src="" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+    <video src="media/vid_02_centrale.mp4" playsinline preload="auto" muted></video>
   </section>
 
   <!-- 12 -->
@@ -79,15 +76,12 @@
   <!-- 21 (Vote 8) -->
   <section class="slide"><iframe data-vote="8"></iframe></section>
 
-  
-  <!-- 22 (Conclusion – YouTube) -->
-<section class="slide">
-  <iframe class="yt"
-    data-src="https://www.youtube-nocookie.com/embed/ID_CONCLUSION?autoplay=1&mute=1&controls=0&rel=0&playsinline=1&fs=1&modestbranding=1"
-    src=""
-    allow="autoplay; fullscreen; picture-in-picture"
-    allowfullscreen></iframe>
-</section>
+  <!-- 22 -->
+  <section class="slide">
+    <video playsinline preload="auto" muted>
+      <source src="media/vid_03_conclusion_h264.mp4" type="video/mp4">
+    </video>
+  </section>
 
   <!-- 23 -->
   <section class="slide"><img src="media/img_12_finale.png" alt=""></section>
@@ -170,16 +164,9 @@ let lastNav = 0;
     const cur = slides[i];
 
     // Vote : recharge toujours vote.html => reset chrono
-    const frVote = cur?.querySelector('iframe[data-vote]');
-    if (frVote) {
+    const fr = cur?.querySelector("iframe");
+    if (fr) {
       loadVoteIframeFresh(cur);
-      return;
-    }
-
-    // YouTube (ou autre iframe média) : charge seulement quand la slide s'affiche
-    const frYT = cur?.querySelector('iframe.yt[data-src]');
-    if (frYT) {
-      try { frYT.src = frYT.getAttribute('data-src'); } catch(e) {}
       return;
     }
 
