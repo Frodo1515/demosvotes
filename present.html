@@ -90,34 +90,34 @@
   <!-- 12 -->
   <section class="slide"><img src="media/img_06_nicolas_01.jpeg" alt=""></section>
   <!-- 13 -->
-  <section class="slide"><img src="media/img_07_nicolas_02.jpeg" alt=""></section>
+  <section class="slide"><img src="media/img_07_nicolas_02.png" alt=""></section>
 
-  <!-- 14 -->
-  <section class="slide"><img src="media/img_08_preparation_vote_5.png" alt=""></section>
-  <!-- 15 (Vote 5) -->
-  <section class="slide"><iframe data-vote="5"></iframe></section>
-
-  <!-- 16 -->
-  <section class="slide"><img src="media/img_09_preparation_vote_6.png" alt=""></section>
-  <!-- 17 (Vote 6) -->
-  <section class="slide"><iframe data-vote="6"></iframe></section>
-
-  <!-- 18 -->
-  <section class="slide"><img src="media/img_10_preparation_vote_7.png" alt=""></section>
-  <!-- 19 (Vote 7) -->
-  <section class="slide"><iframe data-vote="7"></iframe></section>
-
-  <!-- 20 -->
-  <section class="slide"><img src="media/img_11_preparation_vote_8.png" alt=""></section>
-  <!-- 21 (Vote 8) -->
-  <section class="slide"><iframe data-vote="8"></iframe></section>
-
-  <!-- 22 -->
+  <!-- 14 (Vidéo conclusion déplacée ici) -->
   <section class="slide">
     <video playsinline preload="auto" muted>
-      <source src="media/vid_03_conclusion_h264.mp4" type="video/mp4">
+      <source src="media/vid_03_conclusion_H264.mp4" type="video/mp4">
     </video>
   </section>
+
+  <!-- 15 -->
+  <section class="slide"><img src="media/img_08_preparation_vote_5.png" alt=""></section>
+  <!-- 16 (Vote 5) -->
+  <section class="slide"><iframe data-vote="5"></iframe></section>
+
+  <!-- 17 -->
+  <section class="slide"><img src="media/img_09_preparation_vote_6.png" alt=""></section>
+  <!-- 18 (Vote 6) -->
+  <section class="slide"><iframe data-vote="6"></iframe></section>
+
+  <!-- 19 -->
+  <section class="slide"><img src="media/img_10_preparation_vote_7.png" alt=""></section>
+  <!-- 20 (Vote 7) -->
+  <section class="slide"><iframe data-vote="7"></iframe></section>
+
+  <!-- 21 -->
+  <section class="slide"><img src="media/img_11_preparation_vote_8.png" alt=""></section>
+  <!-- 22 (Vote 8) -->
+  <section class="slide"><iframe data-vote="8"></iframe></section>
 
   <!-- 23 -->
   <section class="slide"><img src="media/img_12_finale.png" alt=""></section>
@@ -149,15 +149,12 @@
   async function playWithRetry(v) {
     if (!v) return;
 
-    // si <source>, forcer le load()
     if (v.querySelector?.("source")) {
       try { v.load(); } catch(e) {}
     }
 
     v.playsInline = true;
     v.autoplay = true;
-
-    // Démarre muet (autoplay fiable), puis remet le son si started
     v.muted = true;
 
     const tryPlay = async () => {
@@ -182,33 +179,25 @@
   function unloadIframe(slideEl) {
     const fr = slideEl?.querySelector("iframe");
     if (!fr) return;
-    // stoppe le timer en arrière-plan
     try { fr.src = "about:blank"; } catch(e) {}
   }
 
   function loadVoteIframeFresh(slideEl) {
     const fr = slideEl?.querySelector("iframe");
     if (!fr) return;
-
     const n = fr.getAttribute("data-vote");
     if (!n) return;
-
-    // 👉 vote EN LIGNE (backend commun pour tous les téléphones)
     fr.src = `https://frodo1515.github.io/demosvotes/vote.html?vote=${encodeURIComponent(n)}&_ts=${Date.now()}`;
   }
 
   async function onEnterSlide() {
     hardFocus();
     const cur = slides[i];
-
-    // Vote : recharge toujours vote.html => reset chrono
     const fr = cur?.querySelector("iframe");
     if (fr) {
       loadVoteIframeFresh(cur);
       return;
     }
-
-    // Vidéo
     const v = cur?.querySelector("video");
     if (v) {
       v.onended = () => next();
@@ -218,68 +207,48 @@
 
   async function activate(idx) {
     if (idx < 0 || idx >= slides.length) return;
-
-    // quitte l'ancien vote => stoppe son timer
     unloadIframe(slides[i]);
-
     stopAllVideos();
-
     slides[i]?.classList.remove("active");
     i = idx;
     slides[i]?.classList.add("active");
-
     await onEnterSlide();
   }
 
   function next() { activate(i + 1); }
   function prev() { activate(i - 1); }
 
-    async function startOnce() {
+  async function startOnce() {
     if (started) return;
     started = true;
-
-    // 0) retire l'écran de démarrage
     try { overlay?.remove(); } catch(e) {}
-
-    // 1) plein écran
     try {
       if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
         await document.documentElement.requestFullscreen();
       }
     } catch (e) {}
-
-    // 2) refocus
     try { hardFocus(); } catch(e) {}
-
-    // 3) force un repaint de la slide courante (image 1)
     slides[i]?.classList.remove("active");
     slides[i]?.classList.add("active");
   }
 
-
   const onKey = async (e) => {
     const k = e.key;
-
-    // 1) Première touche = uniquement démarrage (pas de navigation)
     if (!started) {
       e.preventDefault();
       await startOnce();
-      return; // IMPORTANT: pas de next() sur la première touche
+      return;
     }
-
-    // 2) Anti “saut” (touche maintenue / répétition)
     const now = Date.now();
     if (now - lastNav < 250) {
       e.preventDefault();
       return;
     }
-
     if (k === "ArrowRight" || k === "PageDown" || k === " " || k === "Enter") {
       e.preventDefault();
       lastNav = now;
       next();
     }
-
     if (k === "ArrowLeft" || k === "PageUp") {
       e.preventDefault();
       lastNav = now;
@@ -288,14 +257,10 @@
   };
 
   window.addEventListener("keydown", onKey, true);
- 
-
-  // Clic = démarre (plein écran) puis ensuite tu navigues au clavier
   window.addEventListener("click", async () => {
     if (!started) await startOnce();
   }, { capture:true });
 
-  // Init
   slides[0]?.classList.add("active");
   hardFocus();
 </script>
